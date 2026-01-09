@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        
+        .image-info {
+            padding: 15px;
+        }
+        
+        .image-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+        
+        .image-size {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            cursor: pointer;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .modal-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #bbb;
+        }
+        
+        .stats {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Gallery</h1>
+    <div class="stats">Total images: 14</div>
+    
+    <div class="gallery">
+        <div class="image-card">
+            <img src="cathedral.jpg" alt="cathedral.jpg" onclick="openModal('cathedral.jpg')">
+            <div class="image-info">
+                <div class="image-name">cathedral.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="church.jpg" alt="church.jpg" onclick="openModal('church.jpg')">
+            <div class="image-info">
+                <div class="image-name">church.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="emir.jpg" alt="emir.jpg" onclick="openModal('emir.jpg')">
+            <div class="image-info">
+                <div class="image-name">emir.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="harvesters.jpg" alt="harvesters.jpg" onclick="openModal('harvesters.jpg')">
+            <div class="image-info">
+                <div class="image-name">harvesters.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="icon.jpg" alt="icon.jpg" onclick="openModal('icon.jpg')">
+            <div class="image-info">
+                <div class="image-name">icon.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="italil.jpg" alt="italil.jpg" onclick="openModal('italil.jpg')">
+            <div class="image-info">
+                <div class="image-name">italil.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="lastochikino.jpg" alt="lastochikino.jpg" onclick="openModal('lastochikino.jpg')">
+            <div class="image-info">
+                <div class="image-name">lastochikino.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="lugano.jpg" alt="lugano.jpg" onclick="openModal('lugano.jpg')">
+            <div class="image-info">
+                <div class="image-name">lugano.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="melons.jpg" alt="melons.jpg" onclick="openModal('melons.jpg')">
+            <div class="image-info">
+                <div class="image-name">melons.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="monastery.jpg" alt="monastery.jpg" onclick="openModal('monastery.jpg')">
+            <div class="image-info">
+                <div class="image-name">monastery.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="self_portrait.jpg" alt="self_portrait.jpg" onclick="openModal('self_portrait.jpg')">
+            <div class="image-info">
+                <div class="image-name">self_portrait.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="siren.jpg" alt="siren.jpg" onclick="openModal('siren.jpg')">
+            <div class="image-info">
+                <div class="image-name">siren.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="three_generations.jpg" alt="three_generations.jpg" onclick="openModal('three_generations.jpg')">
+            <div class="image-info">
+                <div class="image-name">three_generations.jpg</div>
+            </div>
+        </div>
+        <div class="image-card">
+            <img src="tobolsk.jpg" alt="tobolsk.jpg" onclick="openModal('tobolsk.jpg')">
+            <div class="image-info">
+                <div class="image-name">tobolsk.jpg</div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="modal-img" src="">
+        </div>
+    </div>
+    
+    <script>
+        function openModal(imageSrc) {
+            document.getElementById('modal').style.display = 'block';
+            document.getElementById('modal-img').src = imageSrc;
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
