@@ -2,7 +2,7 @@ title: COMS4732W Computer Vision 2
 description: A starter template for a Jeykll site using the Just the Docs theme!
 theme: just-the-docs
 
-url: https://just-the-docs.github.io
+url: https://coms4732.github.io
 mathjax: true
 math: mathjax
 
