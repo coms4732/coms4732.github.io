@@ -14,12 +14,19 @@ mathjax: true
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-# Homework 4
-[CS180: Intro to Computer Vision and Computational Photography](https://cal-cs180.github.io/fa25/)
+<header>
+  <h1>
+  Homework 4<br>
+    <!-- TODO: Update fa24 to fa25 when URLs are ready -->
+  </h1>
+</header>
+<a href="../../">COMS4732: Computer Vision 2</a>
 
-# Neural Radiance Field!
 
-## Due Date: November 14th, 2025
+# Neural Radiance Fields!
+
+## <span style="color: red;">Due Date: TBD</span>
+**START EARLY!** This, along with HW5, are by far the most difficult assignments this semester.
 
 **Note on compute requirements:** We're using PyTorch to implement neural networks with GPU acceleration. If you have an M-series Mac (M1/M2/M3), you should be able to run everything locally using the [MPS backend](https://pytorch.org/docs/stable/notes/mps.html). For older or less powerful hardware, we recommend using GPUs from [Colab](https://colab.research.google.com/). Colab Pro is now [free](https://colab.research.google.com/signup) for students.
 
@@ -140,7 +147,7 @@ while True:
 
 ## Part 0.4: Undistorting images and creating a dataset
 
-Now that you have the camera intrinsics and pose estimates, the final step is to undistort your images and package everything into a dataset format that you can use for training NeRF in the later parts of this project.
+Now that you have the camera intrinsics and pose estimates, the final step is to undistort your images and package everything into a dataset format that you can use for training NeRF in the later parts of this assignment.
 
 First, use `cv2.undistort()` to remove any lens distortion from your images. This is important because NeRF assumes a perfect pinhole camera model without distortion.
 
@@ -203,7 +210,7 @@ np.savez(
 
 This dataset can then be loaded in Parts 1 and 2 the same way the provided lego dataset is loaded, allowing you to train a NeRF on your own captured object!
 
-As a sanity check you can test your calibration implementation on our [calibration images](https://drive.google.com/drive/folders/1utiPjbEvnf87Eg4h-7WYVTXk2q6lI4rn?usp=sharing) and our [Lafufu dataset](https://drive.google.com/drive/folders/1aoLM-ay2ZjatVIEtFW7QtuNyjciwydsC?usp=sharing) which we used to train the NeRF example seen at the end of this project.
+As a sanity check you can test your calibration implementation on our [calibration images](https://drive.google.com/drive/folders/1utiPjbEvnf87Eg4h-7WYVTXk2q6lI4rn?usp=sharing) and our [Lafufu dataset](https://drive.google.com/drive/folders/1aoLM-ay2ZjatVIEtFW7QtuNyjciwydsC?usp=sharing) which we used to train the NeRF example seen at the end of this assignment.
 
 ---
 
@@ -315,7 +322,7 @@ $$
 
 **[Impl: Sampling Rays from Images]** In Part 1, we have done random sampling on a single image to get the pixel color and pixel coordinates. Here we can build on top of that, and with the camera intrinsics & extrinsics, we would be able to convert the pixel coordinates into ray origins and directions. Make sure to account for the offset from image coordinate to pixel center (this can be done simply by adding .5 to your UV pixel coordinate grid)! Since we have multiple images now, we have two options of sampling rays. Say we want to sample N rays at every training iteration, option 1 is to first sample M images, and then sample N // M rays from every image. The other option is to flatten all pixels from all images and do a global sampling once to get N rays from all images. You can choose whichever way you do ray sampling.
 
-**[Impl: Sampling Points along Rays.]** After having rays, we also need to discretize each ray into samples that live in the 3D space. The simplest way is to uniformly create some samples along the ray (`t = np.linspace(near, far, n_samples)`). For the lego scene that we have, we can set `near=2.0` and `far=6.0`. The actual 3D coordinates can be acquired by $\mathbf{x} = \mathbf{r}_o + t \mathbf{r}_d$. However this would lead to a fixed set of 3D points, which could potentially lead to overfitting when we train the NeRF later on. On top of this, we want to introduce some small perturbation to the points *only during training*, so that every location along the ray would be touched upon during training. this can be achieved by something like `t = t + (np.random.rand(t.shape) * t_width)` where t is set to be the start of each interval. We recommend to set `n_samples` to 32 or 64 in this project.
+**[Impl: Sampling Points along Rays.]** After having rays, we also need to discretize each ray into samples that live in the 3D space. The simplest way is to uniformly create some samples along the ray (`t = np.linspace(near, far, n_samples)`). For the lego scene that we have, we can set `near=2.0` and `far=6.0`. The actual 3D coordinates can be acquired by $\mathbf{x} = \mathbf{r}_o + t \mathbf{r}_d$. However this would lead to a fixed set of 3D points, which could potentially lead to overfitting when we train the NeRF later on. On top of this, we want to introduce some small perturbation to the points *only during training*, so that every location along the ray would be touched upon during training. this can be achieved by something like `t = t + (np.random.rand(t.shape) * t_width)` where t is set to be the start of each interval. We recommend to set `n_samples` to 32 or 64 in this assignment.
 
 ---
 
@@ -572,13 +579,13 @@ Helpful Tips / Common Mistakes:
 
 ---
 
-## Bells & Whistles
+## Bells & Whistles (Optional)
 
-### Required for CS 280A students only:
+<!-- ### Required for CS 280A students only: -->
 
 - **Render the depths map video for the Lego scene.** Instead of compositing per-point colors to the pixel color in the volume rendering, we can also composite per-point depths to the pixel depth. (See the reference video below)
 
-### Optional for all students:
+<!-- ### Optional for all students: -->
 
 The following are optional explorations for any students interested in going deeper with NeRF.
 
@@ -627,7 +634,11 @@ Make sure your submission includes all of the following:
 - Plot of training loss over iterations
 - Intermediate renders of the scene during training
 
-## Bells & Whistles (if applicable)
+<!-- ## Bells & Whistles (if applicable)
 
 - **CS 280A students:** Depth map video for the Lego scene
-- **Optional:** Any additional explorations you completed
+- **Optional:** Any additional explorations you completed -->
+
+## Acknowledgements
+
+This assignment is based on [Angjoo Kanazawa and Alyosha Efros's version at Berkeley](https://cal-cs180.github.io/fa25/hw/proj4/index.html).

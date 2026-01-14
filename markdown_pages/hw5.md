@@ -582,7 +582,9 @@ Fire</b></p>
 </div>
 
 <br />
-# Part A: The Power of Diffusion Models!
+
+# HW5 Part A: The Power of Diffusion Models!
+<a href="../../">COMS4732: Computer Vision 2</a>
 
 <h2 style="text-align: center">
 <b style="color: red;">Due: TBD</b>
@@ -1763,10 +1765,11 @@ onmouseout="handleMouseOut(this)">
 </video>
 </div>
 
-# Flow Matching from Scratch!
+# HW5 Part B: Flow Matching from Scratch!
+<a href="../../">COMS4732: Computer Vision 2</a>
 ### For this part, you need to submit your code and website PDF, and also your web url to class gallery via this <a href="https://forms.gle/gLQhNCyBUaCACt7W6">Google Form</a>.
 <h2 style="text-align: center">
-<b style="color: red;">Due: 12/12/2025 11:59pm</b>
+<b style="color: red;">Due: TBD</b>
 </h2>
 <h4 style="text-align: center">
 <b>We recommend using GPUs from <a
@@ -1781,7 +1784,6 @@ href="https://colab.research.google.com/drive/1GqpAzvLuPwYiwJaY0xLEqdx5IkBNqk1B?
 notebook</a>.
 <br>
 <br>
-<p style="color: #CC0000; display: inline;"><b>START EARLY!</b></p><span style="margin-left: 5px;"> </span>
 
 ## Neural Network Resources
 <p>
@@ -2245,7 +2247,7 @@ style="display: block; margin-left: 0;">
 ### Deliverables
 <ul>
 <li>Sampling results from the time-conditioned UNet for 1, 5, and 10 epochs. The results should not be perfect, but reasonably good.</li>
-<li>(Optional for CS180, required for CS280A) Check the Bells and Whistles if you want to make it better!</li>
+<li>(Optional) Check the Bells and Whistles if you want to make it better!</li>
 </ul>
 
 
@@ -2382,13 +2384,12 @@ style="display: block; margin-left: 0;">
 learning rate scheduler. Show your visualization after training without the scheduler and provide a description of what you did to compensate for the loss of the scheduler.</li>
 </ul>
 
-#  Part 3: Bells & Whistles 
-<b>Required for CS280A students only:</b>
+#  Part 3: Bells & Whistles (Optional)
+<!-- <b>Required for CS280A students only:</b> -->
 <ul>
 <li><b>A better time-conditioned only UNet: </b> Our time-conditioning only UNet in part 2.3 is actually far from perfect. Its result is way worse than the UNet conditioned by both time and class.
 We can definitively make it better! Show a better visualization image for the time-conditioning only network. Possible approaches include extending the training schedule or making the architecture more expressive. </li>
 </ul>
-<b>Optional for all students:</b>
 <ul>
 <li><b>Your own ideas</b>: Be creative! This UNet can generate images more than digits! You can try it on <a href="http://ufldl.stanford.edu/housenumbers/">SVHN</a> (still digits, but more fancy!), <a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST</a> (not digits, but still grayscale!), or <a href="https://www.cs.toronto.edu/~kriz/cifar.html">CIFAR10</a>!</li>
 </ul>

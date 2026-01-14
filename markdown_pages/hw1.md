@@ -132,11 +132,10 @@ Note that in the case like the Emir of Bukhara (show on right), the images to be
 
 However, for grading, we allow up to **one** image (out of the original 14, excluding your own) to be misaligned in your final results; aim to get the rest properly aligned.
 
-## Bells & Whistles (<b style="color: red;">TBD IF TO ASSIGN OR NOT</b>)
+## Bells & Whistles (Optional)
 
 Although the color images resulting from this automatic procedure will often look strikingly real, they are still a far cry from the manually restored versions available on the LoC website and from other professional photographers. Of course, each such photograph takes days of painstaking Photoshop work, adjusting the color levels, removing the blemishes, adding contrast, etc. Can we make some of these adjustments automatically, without the human in the loop?
 
-*You can use any libraries to solve bells and whistles as long as you can explain what it is doing and why you used it.*
 
 - **Automatic cropping.** Remove white, black or other color borders. Don't just crop a predefined margin off of each side -- actually try to detect the borders or the edge between the border and the image.
 - **Automatic contrasting.** It is usually safe to rescale image intensities such that the darkest pixel is zero (on its darkest color channel) and the brightest pixel is 1 (on its brightest color channel). More drastic or non-linear mappings may improve perceived image quality.
@@ -151,26 +150,26 @@ Although the color images resulting from this automatic procedure will often loo
 
 ## Deliverables
 
-For this project, you must submit both your code and a project webpage as [described here](../submitting.html).
+<!-- For this project, you must submit both your code and a project webpage as [described here](../submitting.html).
 
 The project webpage is your presentation of your work. Imagine that you are writing a blog post about your project for your friends. A good blog post is easy to read and follow, well organized, and visually appealing.
 
 When you introduce new concepts or tricks that improve your results, explain them along the way and show the improved results of your algorithm on example images.
 
-Below are the specific deliverables to keep in mind when writing your project webpage.
+Below are the specific deliverables to keep in mind when writing your project webpage. -->
 
 - The results of a single-scale alignment (using NCC/L2 norm metrics) on the low-resolution images (JPEG files).
 - The results of a multi-scale pyramid alignment (using NCC/L2 norm metrics) on **all** of our [example images](https://drive.google.com/file/d/1XQUUR3R9qnVICT8I3hxd7cMxp5WfqkCA/view?usp=sharing). List the offsets you computed.
 - The results of your algorithm (using NCC/L2 norm metrics) on a few examples of your choosing, downloaded from the [Prokudin-Gorskii collection](https://www.loc.gov/collections/prokudin-gorskii/?st=grid).
 - If your algorithm failed to align any image, provide a brief explanation of why.
-- Describe any bells and whistles you implemented. For maximum credit, show before-and-after images.
-- **Submit your webpage URL to the class gallery via [Google Form](https://forms.gle/u4YEUGMo79swCcwt9).** Also include this URL in your Gradescope submission.
+- Describe any bells and whistles you implemented.
 
-**Important:** Images are for the project webpage only. Do <u>not</u> upload image files (e.g., `.jpg`, `.png`, `.tif`) to Gradescope. This keeps submissions small and avoids hitting Gradescope's 100 MB upload limit, which large image sets can easily exceed.
+<!-- **Important:** Images are for the submission only. Do <u>not</u> upload image files (e.g., `.jpg`, `.png`, `.tif`). This keeps submissions small and avoids hitting Gradescope's 100 MB upload limit, which large image sets can easily exceed. -->
+
+**Important:** Submit only a pdf with all steps and results outlined, as images will make the submission too large.
 
 ## Final Advice
 
-- You'll build image pyramids again in Project 2—write clean, reusable code.
 - Implement almost everything from scratch. It's fine to use functions for reading, writing, resizing, shifting, and displaying images (e.g., imread, imresize, circshift), but don't use high‑level functions for Laplacian/Gaussian pyramids, automatic alignment, etc. If in doubt, ask on Ed.
 - Aim for under 1 minute per image. If it takes hours, optimize.
 - Vectorize/parallelize and avoid many for‑loops. See Python performance tips and NumPy broadcasting: [Python](https://wiki.python.org/moin/PythonSpeed/PerformanceTips#Loops) · [NumPy Broadcasting](https://numpy.org/doc/stable/user/basics.broadcasting.html).
@@ -196,8 +195,8 @@ This assignment will be graded out of **100** points, as follows:
   <ul>
     <li><b>+50%:</b> Thorough explanation / approach / good presentation.</li>
     <li><b>+30%:</b> Explanation present, could go further in depth.</li>
-    <li><b>+20%:</b> Minimal explanation on webpage.</li>
-    <li><b>0%:</b> No section / no explanation on webpage.</li>
+    <li><b>+20%:</b> Minimal explanation in submission.</li>
+    <li><b>0%:</b> No section / no explanation in submission.</li>
   </ul>
 </div>
 
@@ -216,8 +215,8 @@ This assignment will be graded out of **100** points, as follows:
     <li><b>+50%:</b> Thorough explanation, walking through each step carefully (e.g., NCC / L2).</li>
     <li><b>+40%:</b> Explains motivation / approach / good presentation.</li>
     <li><b>+30%:</b> Explanation present, could go further in depth.</li>
-    <li><b>+20%:</b> Minimal explanation on webpage.</li>
-    <li><b>0%:</b> No explanation on webpage.</li>
+    <li><b>+20%:</b> Minimal explanation in submission.</li>
+    <li><b>0%:</b> No explanation in submission.</li>
   </ul>
 </div>
 
@@ -249,3 +248,7 @@ Since one failure is allowed while still receiving full credit for alignment, ai
 **Q: What if I used a better distance function beyond L2 and NCC to get better alignments?**
 
 That's great and encouraged. However, to receive full credit you must still document results using the basic distance functions (L2/NCC). If you skip this, your presentation score will be penalized.
+
+## Acknowledgements
+
+This assignment is based on [Alyosha Efros's version at Berkeley](https://cal-cs180.github.io/fa25/hw/proj1/partB.html).
