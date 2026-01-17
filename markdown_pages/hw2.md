@@ -111,6 +111,10 @@ This assignment will involve creating a system for automatically detecting corre
 
 We will follow the paper ["Multi-Image Matching using Multi-Scale Oriented Patches"](https://cal-cs180.github.io/fa25/hw/proj3/Papers/MOPS.pdf) by Brown et al. but with several simplifications. Read the paper first and make sure you understand it, then implement the algorithm.
 
+## Step 0: Taking photos (0 points, required)
+
+Take your 2 photos as you would a panoramic, keeping in mind to keep your camera level, only rotating your camera but not translating it.
+
 ## Step 1: Harris Corner Detection (5 points)
 
 - Start with Harris Interest Point Detector (Section 2). We won't worry about multi-scale – just do a single scale. Also, don't worry about sub-pixel accuracy. Re-implementing Harris is a thankless task – so you can use our sample code: [harris.py](harris.py).

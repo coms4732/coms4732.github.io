@@ -112,17 +112,17 @@ toc: true
 
 The goal of this assignment is to take the digitized Prokudin-Gorskii glass plate images and, using image processing techniques, automatically produce a color image with as few visual artifacts as possible. In order to do this, you will need to extract the three color channel images, place them on top of each other, and align them so that they form a single RGB color image. [This](http://www.loc.gov/exhibits/empire/making.html) is a cool explanation on how the Library of Congress composed their color images.
 
-Some starter code is available in [Python](https://inst.eecs.berkeley.edu/~cs180/fa24/hw/proj1/data/colorize_skel.py); do not feel obligated to use it. We will assume that a simple x,y translation model is sufficient for proper alignment. However, the full-size glass plate images (i.e. `.tif` files) are very large, so your alignment procedure will need to be relatively fast and efficient. When you begin your naive implementation, you should start with the smaller files `monastery.jpg` and `cathedral.jpg` provided, or by downsizing the larger files. Your submission should be ran on the full-size images.
+Some starter code is available in [Python](/hws/hw1/starter_code.txt); do not feel obligated to use it. We will assume that a simple x,y translation model is sufficient for proper alignment. However, the full-size glass plate images (i.e. `.tif` files) are very large, so your alignment procedure will need to be relatively fast and efficient. When you begin your naive implementation, you should start with the smaller files `monastery.jpg` and `cathedral.jpg` provided, or by downsizing the larger files. Your submission should be ran on the full-size images.
 
 ## Details
 
 <img src="/hws/hw1/proj1_files/image003.jpg" alt="example negative" style="float: right">
 
-A few of the digitized glass plate images (both hi-res and low-res versions) will be placed in the following zip file (note that the filter order from top to bottom is BGR, not RGB!): [data.zip](https://drive.google.com/file/d/1XQUUR3R9qnVICT8I3hxd7cMxp5WfqkCA/view?usp=sharing) ([online gallery for preview](/hws/hw1/gallery/)).
+A few of the digitized glass plate images (both hi-res and low-res versions) will be placed in the following zip file (note that the filter order from top to bottom is BGR, not RGB!): [data.zip](https://drive.google.com/file/d/1kxitAaJHwijL9tdCLVLXRxI8cvWrLPGP/view?usp=share_link) ([online gallery for preview](/hws/hw1/gallery/)).
 
 Your program will take a glass plate image as input and produce a single color image as output. The program should divide the image into three equal parts and align the second and the third parts (e.x. G and R) to the first (B). For each image, you will need to print the (x,y) displacement vector that was used to align the parts.
 
-The easiest way to align the parts is to exhaustively search over a window of possible displacements (say `[-15,15]` pixels), score each one using some image matching metric, and take the displacement with the best score. There is a number of possible metrics that one could use to score how well the images match. The simplest one is just the L2 norm also known as the **Euclidean Distance** which is simply `sqrt(sum(sum((image1-image2).^2)))` where the sum is taken over the pixel values. Another is **Normalized Cross-Correlation** (NCC), which is simply a dot product between two normalized vectors: (`image1./||image1||` and `image2./||image2||`).
+The easiest way to align the parts is to exhaustively search over a window of possible displacements (say `[-15,15]` pixels), score each one using some image matching metric, and take the displacement with the best score. There is a number of possible metrics that one could use to score how well the images match. The simplest one is just the L2 norm also known as the **Euclidean Distance** which is simply `sqrt(sum(sum((image1-image2).^2)))` where the sum is taken over the pixel values. Another is **Normalized Cross-Correlation** (NCC), which is simply a dot product between two normalized vectors: (`image1/||image1||` and `image2/||image2||`).
 
 Exhaustive search will become prohibitively expensive if the pixel displacement is too large (which will be the case for high-resolution glass plate scans). In this case, you will need to implement a faster search procedure such as an image pyramid. An image pyramid represents the image at multiple scales (usually scaled by a factor of 2) and the processing is done sequentially starting from the coarsest scale (smallest image) and going down the pyramid, updating your estimate as you go. It is very easy to implement by adding recursive calls to your original single-scale implementation. You should implement the pyramid functionality yourself using appropriate downsampling techniques.
 
@@ -146,7 +146,7 @@ Although the color images resulting from this automatic procedure will often loo
 (Optional) **Feel free to come up with your own approaches.** There is no right answer here -- just try out things and see what works. For example, the borders of the photograph will have strange colors since the three channels won't exactly align. See if you can devise an automatic way of cropping the border to get rid of the bad stuff. One possible idea is that the information in the good parts of the image generally agrees across the color channels, whereas at borders it does not.
 
 - **Better transformations.** Instead of searching for the best x and y translation, additionally search over small scale changes and rotations. Adding two more dimensions to your search will slow things down, but the same course to fine progression should help alleviate this.
-- **Aligning and processing data from other sources.** In many domains, such as astronomy, image data is still captured one channel at a time. Often the channels don't correspond to visible light, but NASA artists stack these channels together to create false color images. For example, this [tutorial](http://www.wikihow.com/Process-Your-Own-Colour-Images-from-Hubble-Data) on how to process Hubble Space Telescope imagery yourself. Also, consider images like [this one of a coronal mass ejection](http://www.flickr.com/photos/gsfc/7931831962/in/set-72157631408160534) built by combining [ultraviolet images](http://www.nasa.gov/mission_pages/sunearth/news/News090412-filament.html) from the Solar Dynamics Observatory. To truly show that your algorithm works, you should demonstrate a non-trivial alignment and color correction that your algorithm found.
+- **Aligning and processing data from other sources.** In many domains, such as astronomy, image data is still captured one channel at a time. Often the channels don't correspond to visible light, but NASA artists stack these channels together to create false color images. For example, this [tutorial](http://www.wikihow.com/Process-Your-Own-Colour-Images-from-Hubble-Data) on how to process Hubble Space Telescope imagery yourself. Also, consider images like [this one of a coronal mass ejection](http://www.flickr.com/photos/gsfc/7931831962/in/set-72157631408160534) built by combining [ultraviolet images](https://svs.gsfc.nasa.gov/11095/) from the Solar Dynamics Observatory. To truly show that your algorithm works, you should demonstrate a non-trivial alignment and color correction that your algorithm found.
 
 ## Deliverables
 
@@ -159,7 +159,7 @@ When you introduce new concepts or tricks that improve your results, explain the
 Below are the specific deliverables to keep in mind when writing your project webpage. -->
 
 - The results of a single-scale alignment (using NCC/L2 norm metrics) on the low-resolution images (JPEG files).
-- The results of a multi-scale pyramid alignment (using NCC/L2 norm metrics) on **all** of our [example images](https://drive.google.com/file/d/1XQUUR3R9qnVICT8I3hxd7cMxp5WfqkCA/view?usp=sharing). List the offsets you computed.
+- The results of a multi-scale pyramid alignment (using NCC/L2 norm metrics) on **all** of our examples (in the data .zip file). List the offsets you computed.
 - The results of your algorithm (using NCC/L2 norm metrics) on a few examples of your choosing, downloaded from the [Prokudin-Gorskii collection](https://www.loc.gov/collections/prokudin-gorskii/?st=grid).
 - If your algorithm failed to align any image, provide a brief explanation of why.
 - Describe any bells and whistles you implemented.
@@ -251,4 +251,4 @@ That's great and encouraged. However, to receive full credit you must still docu
 
 ## Acknowledgements
 
-This assignment is based on [Alyosha Efros's version at Berkeley](https://cal-cs180.github.io/fa25/hw/proj1/partB.html).
+This assignment is based on [Alyosha Efros's version at Berkeley](https://cal-cs180.github.io/fa25/hw/proj1/index.html).
