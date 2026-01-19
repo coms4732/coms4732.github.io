@@ -548,46 +548,28 @@ padding-right: 1em;
 
 <div>
 
-<video id="hero-video" width="640" height="320" muted autoplay playsinline loop
+<video id="hero-video" width="640" height="320" muted autoplay playsinline
 style="display: block; margin-left: auto; margin-right: auto;">
 <source type="video/mp4" src="/hws/hw5/assets/new_c_20_fm.mp4" />
 </video>
+<p style="text-align: center; font-size: 0.8em; color: #666; margin-top: 4px;">(refresh page to rewatch animations)</p>
 </div>
 
-<script>
-// Attach event listener immediately for the hero video
-(function() {
-var heroVideo = document.getElementById('hero-video');
-if (heroVideo) {
-heroVideo.loop = false;
-heroVideo.playbackRate = 1;
-    
-// When video ends, wait 1 second then play again
-heroVideo.addEventListener('ended', function() {
-console.log('Video ended, will replay in 1 second');
-setTimeout(function() {
-heroVideo.currentTime = 0;
-heroVideo.play().catch(function(error) {
-console.log('Video play failed:', error);
-});
-}, 1000); // 1 second delay
-});
-}
-})();
-</script>
-
 # HW5 Part B: Flow Matching from Scratch!
-### For this part, you need to submit your code and website PDF, and also your web url to class gallery via this <a href="https://forms.gle/gLQhNCyBUaCACt7W6">Google Form</a>.
+<a href="../../">COMS4732: Computer Vision 2</a>
+
+[Part A](/hw5/part-a/)
+
 <h2 style="text-align: center">
 <b style="color: red;">Due: TBD</b>
 </h2>
 <h4 style="text-align: center">
 <b>We recommend using GPUs from <a
 href="https://colab.research.google.com/">Colab</a> to finish this
-project!</b>
+project! <br>(students get Colab Pro for free)!</b>
 </h4>
 
-## Overview
+# Overview
 You will train your own <a href="https://arxiv.org/abs/2210.02747">flow matching</a> model on MNIST. Starter code can
 be found in the <a
 href="https://colab.research.google.com/drive/1GqpAzvLuPwYiwJaY0xLEqdx5IkBNqk1B?usp=drive_link">provided
@@ -633,7 +615,7 @@ The structure of your training code will be very similar to this one.
 
 <!-- <p>Note: this is an updated version of <a href="https://cal-cs180.github.io/fa24/hw/proj5/">CS180's Project 5</a> part B with flow matching instead of DDPM diffusion. For the DDPM version, please see <a href="https://cal-cs180.github.io/fa24/hw/proj5/partb.html">here</a>.</p> -->
 
-## Part 1: Training a Single-Step Denoising UNet
+# Part 1: Training a Single-Step Denoising UNet
 <p class="text">
 Let's warmup by building a simple one-step denoiser. Given a noisy image
 $z$, we
@@ -642,7 +624,7 @@ image $x$. To do so, we can optimize over an L2 loss:
 $$L = \mathbb{E}_{z,x} \|D_{\theta}(z) - x\|^2 \tag{B.1}$$
 </p>
 
-###  1.1 Implementing the UNet
+##  1.1 Implementing the UNet
 In this project, we implement the denoiser as a <a
 href="https://arxiv.org/abs/1505.04597"> UNet</a>. It consists of a
 few downsampling and upsampling blocks with skip connections.
@@ -715,7 +697,7 @@ UpConv</tt></b>.</li>
 </ul> -->
 </p>
 
-###  1.2 Using the UNet to Train a Denoiser
+##  1.2 Using the UNet to Train a Denoiser
 Recall from equation 1 that we aim to solve the following denoising
 problem:
 
@@ -736,12 +718,18 @@ $$
 Visualize the different noising processes over $\sigma = [0.0, 0.2, 0.4,
 0.5, 0.6, 0.8, 1.0]$, assuming normalized $x \in [0, 1]$.
 
-You should see noisier images as $\sigma$ increases.
+
 
 ### <span style="color: red;">Deliverable</span>
 <ul>
 <li>A visualization of the noising process using $\sigma = [0.0,
 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]$.</li>
+</ul>
+
+### <span style="color: green;">Hint</span>
+<ul>
+<li> You should see noisier images as $\sigma$ increases.
+</li>
 </ul>
 <!-- <div style="text-align: center;">
 <img src="/hws/hw5/assets/varying_sigma.png" alt="Varying Sigmas" height="600"
@@ -783,10 +771,9 @@ style="display: block; margin-left: auto; margin-right: auto" />
 <p class="text">Figure 4: Training Loss Curve</p>
 </div> -->
 
-<p class="text"></p>
-You should visualize denoised results on the test set at the end of
-training. Display sample results after the 1st and 5th epoch.
-</p>
+<p class="text">You should visualize denoised results on the test set at the end of
+training. Display sample results after the 1st and 5th epoch.</p>
+
 <p class="text">
 After 5 epoch training, they should look something like these:
 </p>
@@ -830,14 +817,14 @@ style="max-width: 90%; height: auto; display: block; margin-left: auto; margin-r
 <p class="text">Figure 7: Results on digits from the test set with varying
 noise levels.</p>
 </div> -->
-### <span style="color: red;">Deliverables</span>
+### <span style="color: red;">Deliverable</span>
 <ul>
 <li>Sample results on the test set with out-of-distribution noise levels
 after the model is trained. Keep the same image and
 vary $\sigma = [0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]$.</li>
 </ul>
 
-## 1.2.3 Denoising Pure Noise
+### 1.2.3 Denoising Pure Noise
 <p>To make denoising a generative task, we'd like to be able to denoise pure, random Gaussian noise. We can think of this as starting with a blank canvas $z = \epsilon$ where $\epsilon \sim N(0, I)$ and denoising it to get a clean image $x$.</p>
 
 <p>Repeat the same training process as in part 1.2.1, but input pure noise $\epsilon \sim N(0, I)$ and denoise it for 5 epochs. Display your results after 1 and 5 epochs.</p>
@@ -852,7 +839,7 @@ training process that denoises pure noise.</li>
 <li>A brief description of the patterns observed in the generated outputs and explanations for why they may exist.</li>
 </ul>
 
-<b><span style="color: green;">Hint</span></b>
+### <span style="color: green;">Hints</span>
 <ul>
 <li>
 For the last question, recall that with an MSE loss, the model learns to predict the point that
@@ -873,7 +860,7 @@ This consists of: <ul>
 </li>
 </ul>
 
-## Part 2: Training a Flow Matching Model
+# Part 2: Training a Flow Matching Model
 We just saw that one-step denoising does not work well for generative tasks. Instead, we need to iteratively denoise the image, and we will do so with <a href="https://arxiv.org/abs/2210.02747">flow matching</a>. 
 Here, we will iteratively denoise an image by training a UNet model to predict the `flow' from our noisy data to clean data.
 
@@ -897,7 +884,7 @@ This is a vector field describing the position of a point $x_t$ at time $t$ rela
 L = \mathbb{E}_{x_0 \sim p_0(x_0), x_1 \sim p_1(x_1), t \sim U[0, 1]} \|(x_1-x_0) - u_\theta(x_t, t)\|^2. \tag{B.5}
 \end{equation}</p>
 
-### 2.1 Adding Time Conditioning to UNet
+## 2.1 Adding Time Conditioning to UNet
 We need a way to inject scalar $t$ into our UNet model to condition it. There are many ways to do this. Here is what we suggest:
 
 <div style="text-align: center;">
@@ -931,7 +918,8 @@ You can embed $t$ by following this pseudo code:
 fc1_t = FCBlock(...)
 fc2_t = FCBlock(...)
 
-# the t passed in here should be normalized to be in the range [0, 1]
+# the t passed in here should be normalized
+# to be in the range [0, 1]
 t1 = fc1_t(t)
 t2 = fc2_t(t)
 
@@ -947,7 +935,7 @@ up1 = up1 * t2
 </code></pre>
 </div>
 
-### 2.2 Training the UNet
+## 2.2 Training the UNet
 Training our time-conditioned UNet $u_\theta(x_t, t)$ is now pretty easy. Basically, we pick a random image $x_1$
 from the training set, a random timestep $t$, add noise to $x_1$ to get $x_t$, and train the denoiser to predict the flow at $x_t$. We repeat this for different images and different timesteps until the model converges and we are happy.
 
@@ -990,7 +978,7 @@ recommended hidden dimension <code>D = 64</code>. Follow the diagram and pseudoc
 </ul>
 
 
-### 2.3 Sampling from the UNet
+## 2.3 Sampling from the UNet
 We can now use our UNet for iterative denoising using the algorithm below! The results would not be perfect, but legible digits should emerge
 <br>
 <br>
@@ -1004,7 +992,7 @@ class="responsive-algo" />
 style="justify-content: center; max-width: 1200px; margin: 0 auto;">
 <div style="width: 100%; max-width: 600px;">
         
-<video id="video1" width="100%" muted loop playbackRate="0.75"
+<video id="video1" width="100%" muted autoplay playsinline
 style="display: block; margin-left: 0;">
 <source type="video/mp4" src="/hws/hw5/assets/t_only_e1_fm.mp4" />
 </video>
@@ -1012,7 +1000,7 @@ style="display: block; margin-left: 0;">
 </div>
 <div style="width: 100%; max-width: 600px;">
         
-<video id="video2" width="100%" muted loop playbackRate="0.75"
+<video id="video2" width="100%" muted autoplay playsinline
 style="display: block; margin-left: 0;">
 <source type="video/mp4" src="/hws/hw5/assets/t_only_e10_fm.mp4" />
 </video>
@@ -1061,7 +1049,7 @@ style="display: block; margin-left: 0;">
 </ul>
 
 
-### 2.4 Adding Class-Conditioning to UNet
+## 2.4 Adding Class-Conditioning to UNet
 To make the results better and give us more control for image generation, we can also optionally condition our UNet on the class of the digit 0-9. This will require adding 2 more <b><tt>FCBlock</tt></b>s to our UNet but, we suggest that for class-conditioning vector $c$, you make it a one-hot vector instead of a single scalar. 
 
 Because we still want our UNet to work without it being conditioned on the class (recall the classifer-free guidance you implemented in part a), we implement dropout where 10% of the time ($p_{\text{uncond}}= 0.1$) we drop the class conditioning vector $c$ by setting it to 0.
@@ -1092,7 +1080,7 @@ up1 = c2 * up1 + t2
 </code></pre>
 </div>
 
-### 2.5 Training the UNet
+## 2.5 Training the UNet
 <p>Training for this section will be the same as time-only, with the only difference being the conditioning vector $c$ and doing unconditional generation periodically.</p>
 <br>
         
@@ -1103,7 +1091,7 @@ class="responsive-algo" />
 <p class="text">Algorithm B.3. Training class-conditioned UNet</p>
 </div>
     
-#### <span style="color: red;">Deliverable</span>
+### <span style="color: red;">Deliverable</span>
 <ul>
 <li>A training loss curve plot for the class-conditioned UNet over the whole training process. </li>
 </ul>
@@ -1135,7 +1123,7 @@ class="responsive-algo" />
 style="justify-content: center; max-width: 1200px; margin: 0 auto;">
 <div style="width: 100%; max-width: 600px;">
           
-<video id="video1" width="100%" muted loop playbackRate="0.75"
+<video id="video1" width="100%" muted autoplay playsinline
 style="display: block; margin-left: 0;">
 <source type="video/mp4" src="/hws/hw5/assets/new_c_1_fm.mp4" />
 </video>
@@ -1143,7 +1131,7 @@ style="display: block; margin-left: 0;">
 </div>
 <div style="width: 100%; max-width: 600px;">
           
-<video id="video2" width="100%" muted loop playbackRate="0.75"
+<video id="video2" width="100%" muted autoplay playsinline
 style="display: block; margin-left: 0;">
 <source type="video/mp4" src="/hws/hw5/assets/new_c_10_fm.mp4" />
 </video>
@@ -1194,7 +1182,7 @@ style="display: block; margin-left: 0;">
 learning rate scheduler. Show your visualization after training without the scheduler and provide a description of what you did to compensate for the loss of the scheduler.</li>
 </ul>
 
-###  Part 3: Bells & Whistles (Optional)
+#  Part 3: Bells & Whistles (Optional)
 <!-- <b>Required for CS280A students only:</b> -->
 <ul>
 <li><b>A better time-conditioned only UNet: </b> Our time-conditioning only UNet in part 2.3 is actually far from perfect. Its result is way worse than the UNet conditioned by both time and class.
@@ -1204,65 +1192,17 @@ We can definitively make it better! Show a better visualization image for the ti
 <li><b>Your own ideas</b>: Be creative! This UNet can generate images more than digits! You can try it on <a href="http://ufldl.stanford.edu/housenumbers/">SVHN</a> (still digits, but more fancy!), <a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST</a> (not digits, but still grayscale!), or <a href="https://www.cs.toronto.edu/~kriz/cifar.html">CIFAR10</a>!</li>
 </ul>
 
-### <span style="color: red;">Deliverable Checklist</span>
+# <span style="color: red;">Deliverable Checklist</span>
 <ul>
 <li>Make sure that your website and submission include <b>all the deliverables</b> in each section above.</li>
 <li>Submit your <b>PDF</b> and <b>code</b> to corresponding assignments on Gradescope.</li>
-<li>
+<!-- <li>
 <b>The Google Form is required for Part B.</b> Once you have finished both parts A and B, submit the link to your webpage (containing both parts) using this 
-<a href="https://forms.gle/gLQhNCyBUaCACt7W6">Google Form</a>.
+<a href="https://forms.gle/gLQhNCyBUaCACt7W6">Google Form</a>. -->
 </li>
 </ul>
 
-<script>
-window.addEventListener('load', function() {
-// Handle other videos (not the hero video)
-var videos = document.querySelectorAll('video:not(#hero-video)');
-videos.forEach(function(video) {
-video.playbackRate = 1;
-video.loop = true;
-video.play();
-
-// Add hover behavior to each video
-video.addEventListener('mouseover', function() {
-// Pause normal playback
-video.pause();
-        
-// Play in reverse by decreasing currentTime
-const rewindInterval = setInterval(() => {
-if (video.currentTime <= 0) {
-clearInterval(rewindInterval);
-} else {
-video.currentTime -= 0.05; // Slow rewind speed
-}
-}, 40); // Smooth interval
-
-// Store the interval ID so we can clear it on mouseout
-video.rewindInterval = rewindInterval;
-});
-
-video.addEventListener('mouseout', function() {
-// Clear the rewind interval if it exists
-if (video.rewindInterval) {
-clearInterval(video.rewindInterval);
-video.rewindInterval = null;
-}
-// Play forward normally
-video.play();
-});
-});
-});
-
-// These handlers are no longer needed since we're handling everything in the load event
-function handleMouseOver(video) {
-// Empty or can be removed
-}
-
-function handleMouseOut(video) {
-// Empty or can be removed
-}
-</script>
-### Acknowledgements
+# Acknowledgements
 <p>This project was a joint effort by <a
 href="https://ryantabrizi.com/">Ryan Tabrizi</a>, <a
 href="https://dangeng.github.io/">Daniel Geng</a>, <a

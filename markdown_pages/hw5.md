@@ -629,6 +629,14 @@ Fire</b></p>
 
 </div>
 
+<div>
+<video id="hero-video" width="640" height="320" muted autoplay playsinline
+style="display: block; margin-left: auto; margin-right: auto;">
+<source type="video/mp4" src="/hws/hw5/assets/new_c_20_fm.mp4" />
+</video>
+<!-- <p style="text-align: center; font-size: 0.8em; color: #666; margin-top: 4px;">(refresh page to rewatch animations)</p> -->
+</div>
+
 <br />
 
 # Homework 5: Diffusion Models and Flow Matching

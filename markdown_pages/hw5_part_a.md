@@ -541,12 +541,83 @@ padding-right: 1em;
     width: 95%;
   }
 }
+
+/* Hero images at the top - fit all 4 on one line at max size */
+.hero-images {
+gap: 10px;
+}
+
+.hero-images > div {
+flex: 1 1 22%;
+width: 22%;
+min-width: 0;
+max-width: 280px;
+padding: 5px;
+}
+
+/* Full-resolution: Visual Anagrams and Hybrid Images at original size */
+.image-container-full-res > div {
+  width: auto !important;
+  min-width: unset !important;
+  max-width: none !important;
+}
+.image-container-full-res img {
+  width: auto !important;
+  max-width: none !important;
+}
     
 </style>
+
+<div class="image-container hero-images">
+<div>
+<div class="dissolve-container">
+<img src="/hws/hw5/assets/hole_filling3.png" alt="Original Campanile"
+class="dissolve-image original">
+<img src="/hws/hw5/assets/hole_filling.png" alt="Hole Filled"
+class="dissolve-image edited">
+</div>
+<p><b>Hole Filling</b></p>
+</div>
+<div>
+<!-- <div class="dissolve-container">
+<img src="/hws/hw5/assets/dog.png" alt="Original Dog"
+class="dissolve-image original">
+<img src="/hws/hw5/assets/sdedit_dog.png" alt="Edited Dog"
+class="dissolve-image edited">
+</div> -->
+<div class="dissolve-container">
+<img src="/hws/hw5/assets/pixel_bear.png" alt="Original Dog"
+class="dissolve-image original">
+<img src="/hws/hw5/assets/sdedit_bear2.png" alt="Edited Dog"
+class="dissolve-image edited">
+</div>
+<p><b>"Make it Real"</b></p>
+</div>
+<div>
+<img src="/hws/hw5/assets/skull2.png" alt="Man Wearing Hat"
+class="zoom-animation">
+<div class="caption-container">
+<p class="caption-default"><b>A Lithograph of a Waterfall</b></p>
+<p class="caption-transform"><b>A Lithograph of a Skull</b></p>
+</div>
+</div>
+<div>
+<img src="/hws/hw5/assets/old_man.png" alt="Bear Dancing" class="rotating-image">
+<div class="caption-container">
+<p class="caption-default"><b>An Oil Painting of an Old Man</b></p>
+<p class="caption-transform"><b>An Oil Painting of People Around a
+Fire</b></p>
+</div>
+        
+</div>
+
+</div>
+
+<br />
 # HW5 Part A: The Power of Diffusion Models!
 <a href="../../">COMS4732: Computer Vision 2</a>
 
-[Jump to part B](#hw5-part-b-flow-matching-from-scratch)
+[Part B](/hw5/part-b/)
 
 <h2 style="text-align: center">
 <b style="color: red;">Due: TBD</b>
@@ -554,10 +625,10 @@ padding-right: 1em;
 <h4 style="text-align: center">
 <b>We recommend using GPUs from <a
 href="https://colab.research.google.com/">Colab</a> to finish this
-project!</b>
+project! <br>(students get Colab Pro for free)!</b>
 </h4>
 
-## Overview
+# Overview
 <p>In part A you will play around with diffusion models, implement diffusion
 sampling loops, and use them for other tasks such as inpainting and
 creating optical illusions.
@@ -571,8 +642,8 @@ still submit a webpage with your results.</p>
 
 <p style="color: red; display: inline;"><b>START EARLY!</b></p><span style="margin-left: 5px;"> This assignment, in many ways, will be the most difficult project this semester.</span>
 
-##  Part 0: Setup
-### Gaining Access to DeepFloyd
+#  Part 0: Setup
+## Gaining Access to DeepFloyd
 <p class="text">
 We are going to use the <a
 href="https://huggingface.co/docs/diffusers/api/pipelines/deepfloyd_if">DeepFloyd
@@ -597,7 +668,7 @@ href="https://huggingface.co/docs/hub/security-tokens#what-are-user-access-token
 Face Hub access token</a> below. You should be able to find and create
 tokens <a href="https://huggingface.co/settings/tokens">here</a>. A read token is enough for this project.</li>
 </ol>
-### Play with the Model using Your Own Text Prompts!
+## Play with the Model using Your Own Text Prompts!
 <p>
 DeepFloyd was trained as a text-to-image model, which takes text prompts as input and outputs images that are aligned with the text. 
 However, a raw text string cannot be directly used as the model's input — we first need to convert it into a high-dimensional vector (of 4096 dimensions in our case) that the model can understand, a.k.a. prompt embeddings.
@@ -625,11 +696,11 @@ different <code>num_inference_steps</code> values.</li>
 same seed all subsequent parts.</li>
 </ul>
 
-**<span style="color: green;">Hints</span>**
+**<span style="color: green;">Hint</span>**
 
-* Since we ask you to generate [visual anagrams](https://dangeng.github.io/visual_anagrams/) and [hybrid images](https://dangeng.github.io/factorized_diffusion/), you may want to include several text pairs prompting them beforehand.
+* Since we ask you to generate [visual anagrams](https://dangeng.github.io/visual_anagrams/) and [hybrid images](https://dangeng.github.io/factorized_diffusion/), you may want to include several text pairs that you plan to use for those tasks later.
 
-## Part 1: Sampling Loops
+# Part 1: Sampling Loops
 In this part of the problem set, you will write your own "sampling loops"
 that use the pretrained DeepFloyd denoisers. These should produce high
 quality images such as the ones generated above.
@@ -637,7 +708,7 @@ quality images such as the ones generated above.
 You will then modify these sampling loops to solve different tasks such
 as inpainting or producing optical illusions.
 
-### Diffusion Models Primer
+## Diffusion Models Primer
 <!-- <div style="text-align: center;">
 <img src="/hws/hw5/assets/ddpm_markov.png" alt="DDPM Markov Chain"
 style="width: 30vw; display: block; margin-left: auto; margin-right: auto" />
@@ -673,7 +744,7 @@ The exact amount of noise added at each step is dictated by noise
 coefficients, $\bar\alpha_t$, which were chosen by the people who
 trained DeepFloyd.
 
-### 1.1 Implementing the Forward Process
+## 1.1 Implementing the Forward Process
 
 <p class="text">
 A key part of diffusion is the forward process, which takes a clean
@@ -747,7 +818,7 @@ corresponding to $\bar\alpha_t$.</li>
 </div>
 </div>
 
-### 1.2 Classical Denoising
+## 1.2 Classical Denoising
 <p class="text">
 Let's try to denoise these images using classical methods.
 Again, take noisy images for timesteps [250, 500, 750], but use
@@ -801,7 +872,7 @@ alt="Gaussian Blur Denoising at t=750">
 </div>
 </div>
 
-### 1.3 One-Step Denoising
+## 1.3 One-Step Denoising
 
 <p class="text">
 Now, we'll use a pretrained diffusion model to denoise. The actual
@@ -905,7 +976,7 @@ alt="Denoised Campanile at t=750">
 </div>
 </div>
 
-### 1.4 Iterative Denoising
+## 1.4 Iterative Denoising
 <p class="text">
 In part 1.3, you should see that the denoising UNet does a much better
 job of projecting the image onto the natural image manifold, but it
@@ -1103,7 +1174,7 @@ alt="Gaussian Blurred Campanile">
 </div>
 </div>
 
-### 1.5 Diffusion Model Sampling
+## 1.5 Diffusion Model Sampling
 <p class="text">
 In part 1.4, we use the diffusion model to denoise an image. Another
 thing
@@ -1156,7 +1227,7 @@ We will fix this in the next section with CFG.</li>
 </div>
 </div>
 
-### 1.6 Classifier-Free Guidance (CFG)
+## 1.6 Classifier-Free Guidance (CFG)
 <p class="text">
 You may have noticed that the generated images in the prior section are
 not very good, and some are completely non-sensical.
@@ -1242,7 +1313,7 @@ section.</li>
 </div>
 </div>
 
-### 1.7 Image-to-image Translation
+## 1.7 Image-to-image Translation
 <b style="color: green;">Note: You should use CFG from this point forward.</b> 
 <p class="text">
 In part 1.4, we take a real image, add noise to it, and then denoise.
@@ -1318,7 +1389,7 @@ original image</li>
 </div>
 </div>
 
-#### 1.7.1 Editing Hand-Drawn and Web Images
+### 1.7.1 Editing Hand-Drawn and Web Images
 <p class="text">
 This procedure works particularly well if we start with a nonrealistic
 image (e.g. painting, a sketch, some scribbles) and project it onto the
@@ -1556,7 +1627,7 @@ alt="Rocket Ship at noise level 20">
 </div>
 </div>
 
-### 1.8 Visual Anagrams
+## 1.8 Visual Anagrams
 <p class="text">
 In this part, we are finally ready to implement <a
 href="https://dangeng.github.io/visual_anagrams/">Visual
@@ -1606,7 +1677,7 @@ it upside down (feel free to take inspirations from this <a href="https://dangen
 the same reasons as above.</li>
 </ul>
 
-<div class="image-container">
+<div class="image-container image-container-full-res">
 <div>
 <img src="/hws/hw5/assets/old_man.png" alt="Old Man">
 <p>An Oil Painting of an Old Man</p>
@@ -1617,7 +1688,7 @@ the same reasons as above.</li>
 </div>
 </div>
 
-### 1.9 Hybrid Images
+## 1.9 Hybrid Images
 <p class="text">
 In this part we'll implement <a
 href="https://arxiv.org/abs/2404.11615">Factorized
@@ -1662,7 +1733,7 @@ kernel size 33 and sigma 2.
 same reasons as above</li>
 </ul>
 
-<div class="image-container">
+<div class="image-container image-container-full-res">
 <div>
 <img src="/hws/hw5/assets/skull2.png"
 alt="Hybrid image of a skull and a waterfall">
@@ -1670,7 +1741,7 @@ alt="Hybrid image of a skull and a waterfall">
 </div>
 </div>
 
-###  Bells & Whistles (Optional)
+#  Bells & Whistles (Optional)
 <ul>
 <li><b>More visual anagrams!</b> Visual anagrams in part 1.8 are created by flipping images
 upside down. However, there are much more transformations that also create visual
@@ -1678,18 +1749,30 @@ anagrams! Refer to this <a href="https://arxiv.org/pdf/2311.17919">paper</a> and
 transformations to create visual anagrams.</li>
 <li><b>Design a course logo</b>! Doing text-conditioned image-to-image translation on UCB's
 logo or your drawing may be a good idea.</li>
-</ul>
-<b>Optional for all students:</b>
-<ul>
 <li><b>Your own ideas</b>: Be creative!</li>
 </ul>
 
-### <span style="color: red;">Deliverable Checklist</span>
+# <span style="color: red;">Deliverable Checklist</span>
 <ul>
 <li>Make sure that your website and submission include <b>all the deliverables</b> in each section above.</li>
 <li>Submit your <b>PDF</b> and <b>code</b> to corresponding assignments on Gradescope.</li>
-<li><b>The Google Form is not required for Part A</b>; you only need to complete the Google Form after both parts are finished.</li>
 </ul>
+
+# Acknowledgements
+
+<p>
+This project was a joint effort by
+<a href="https://dangeng.github.io/">Daniel Geng</a>,
+<a href="https://ryantabrizi.com/">Ryan Tabrizi</a>,
+<a href="https://hangg7.com/">Hang Gao</a>,
+<a href="https://jingfeng0705.github.io/">Jingfeng Yang</a>, and
+<a href="https://www.linkedin.com/in/jameson-crate/">Jameson Crate</a>,
+advised by
+<a href="https://liyueshen.engin.umich.edu/">Liyue Shen</a>,
+<a href="https://andrewowens.com/">Andrew Owens</a>, and
+<a href="https://people.eecs.berkeley.edu/~efros/">Alexei Efros</a>.
+</p>
+
 
 <script>
 window.addEventListener('load', function() {
@@ -1717,7 +1800,7 @@ dissolveEditeds.forEach(el => el.classList.remove('active'));
 <br><br>
 
 <div>
-
+<!-- 
 <video id="video5" width="640" height="320" muted
 style="display: block; margin-left: auto; margin-right: auto;"
 onmouseover="handleMouseOver(this)"
@@ -1725,4 +1808,4 @@ onmouseout="handleMouseOut(this)">
 <source type="video/mp4" src="/hws/hw5/assets/new_c_20_fm.mp4" />
 </video>
 </div>
-
+ -->
