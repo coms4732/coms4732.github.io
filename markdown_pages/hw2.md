@@ -3,6 +3,7 @@ title: Homework 2
 layout: default
 permalink: /hw2/
 toc: true
+nav_order: 3
 ---
 
 <style>
@@ -152,7 +153,8 @@ You will implement the latter: for your set of images, display the NNDR histogra
   <img src="/hws/hw2/step4.2_deliverable.png" alt="Step 4.2 Deliverable" style="max-width: 45%; height: auto;">
 </div>
 
-![Step 4.3 Deliverable](/hws/hw2/step4.3_deliverable.png)
+![Step 4.3 Deliverable](/hws/hw2/step4.3_deliverable1.png)
+![Step 4.3 Deliverable](/hws/hw2/step4.3_deliverable2.png)
 
 **Deliverables:** 
 1. Display the NNDR histogram and highlight the threshold you used. Also specify which similarity metric you used (e.g. SSD, NCC, etc.).
@@ -163,6 +165,9 @@ You will implement the latter: for your set of images, display the NNDR histogra
 3. Visualize the matches using one of the 2 options:
    - Option 1: Color-code the matched features across both images and display them side-by-side. Also, put a number next to each feature to indicate the match index.
    - Option 2: Draw green lines between matched features across both images side-by-side, and put red dots on the unmatched features.
+  
+  **Hint:** 
+  - These matches aren't supposed to be perfect. In the next HW (originally part of this HW) we use RANSAC to estimate the homography (geometry) that relates these two images. This is also known as "geometric validation" since we would only keep the matches that are consistent with the estimated homography/geometry.
 
 <!-- ## Step 5: RANSAC to estimate the homography (40 points)
 
@@ -184,11 +189,18 @@ You will implement the latter: for your set of images, display the NNDR histogra
 
 - **Support for 3+ images:** Implement support for 3+ images by using the homography to stitch together more than 2 images.
 
+## Hints
+- You are *strongly encouraged to use LLMs* to implement any visualization code you wish. **Visualization code only**.
+- If you would like to visually debug using the staff example, the images can be found here: [img1.jpg](/hws/hw2/north1.jpg) and [img2.jpg](/hws/hw2/north2.jpg) 
+- You are encouraged to read the paper and discuss with other students what hyperparameters you used. Closer to the due date, staff may provide their own hyperparameters for the staff example.
+
 ## Deliverables
 
-Submit your code, input images, and html webpage code, and hosted webpage to Gradescope.
+You must submit results for **2 different scenes / pairs of images**. The staff example images does not count.
 
-You must submit your code and visualizations outlined above for **2 different scenes / pairs of images**. You *cannot* use the example provided by the staff. An example for one scene is shown below:
+Submit your code, input images, and html webpage code, and hosted webpage to Gradescope. This should contain 2 scenes with visualizations like the ones shown below (with at least 1 of the 2 feature matching visualizations chosen):
+
+
 
 <div style="display: flex; flex-direction: column; gap: 1em; align-items: center;">
   <img src="/hws/hw2/step4.2_deliverable.png" alt="Step 4.2 Deliverable - NNDR Distribution" style="max-width: 80%; height: auto;">
@@ -202,9 +214,6 @@ You must submit your code and visualizations outlined above for **2 different sc
   </div>
 </div>
 
-## Hints
-- You are *encouraged to use LLMs* to implement any visualization code you wish. **Visualization code only**.
-- If you would like to visually debug using the staff example, the images can be found here: [img1.jpg](/hws/hw2/north1.jpg) and [img2.jpg](/hws/hw2/north2.jpg) 
 
 <!-- - Some hyperparameters (such as the RANSAC NNDR threshold) may need to be tuned for each image pair. For references, the staff solution for the example provided in this webpage used the following:
 

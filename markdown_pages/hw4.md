@@ -3,6 +3,7 @@ title: Homework 4
 layout: default
 permalink: /hw4/
 mathjax: true
+nav_order: 5
 ---
 
 <script>

@@ -3,6 +3,7 @@ title: Homework 3
 layout: default
 permalink: /hw3/
 toc: true
+nav_order: 4
 ---
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>

@@ -2,6 +2,7 @@
 title: Home
 layout: default
 permalink: /
+nav_order: 1
 ---
 
 # COMS4732 - Computer Vision 2

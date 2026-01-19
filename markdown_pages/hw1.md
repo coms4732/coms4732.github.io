@@ -3,6 +3,7 @@ title: Homework 1
 layout: default
 permalink: /hw1/
 toc: true
+nav_order: 2
 ---
 
 <style>
