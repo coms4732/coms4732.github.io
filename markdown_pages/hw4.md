@@ -510,7 +510,7 @@ assert torch.allclose(rendered_colors, correct, rtol=1e-4, atol=1e-4)
 
 ---
 
-## Part 2.6: Training with your own data
+<!-- ## Part 2.6: Training with your own data
 
 You will now use the dataset you created in part 0 to create a NeRF of your chosen object. After training a NeRF on your dataset render a gif of novel views from your scene. We have provided some starter code below which may be useful.
 
@@ -574,7 +574,7 @@ Helpful Tips / Common Mistakes:
 
 <span style="color: red;">**[Impl]**</span> Train a NeRF on your chosen object dataset collected in part 0. Make sure to save the training loss over iterations as well as to generate intermediate renders for the deliverables.
 
-<span style="color: darkgreen;">**[Deliverables]**</span> Create a gif of a camera circling the object showing novel views and discuss any code or hyperparameter changes you had to make. Include a plot of the training loss as well as some intermediate renders of the scene while it is training.
+<span style="color: darkgreen;">**[Deliverables]**</span> Create a gif of a camera circling the object showing novel views and discuss any code or hyperparameter changes you had to make. Include a plot of the training loss as well as some intermediate renders of the scene while it is training. -->
 
 <!-- ![Labubu NeRF](/hws/hw4/assets/labubu_nerf.gif)
 
@@ -611,11 +611,11 @@ The following are optional explorations for any students interested in going dee
 
 Make sure your submission includes all of the following:
 
-- Submit your webpage public URL to the class gallery by filling out [this](https://forms.gle/nbpg6wATeCDU5sj49) form.
+<!-- - Submit your webpage public URL to the class gallery by filling out [this](https://forms.gle/nbpg6wATeCDU5sj49) form. -->
 
-## Part 0: Camera Calibration and 3D Scanning
+<!-- ## Part 0: Camera Calibration and 3D Scanning
 
-- 2 screenshots of your camera frustums visualization in Viser
+- 2 screenshots of your camera frustums visualization in Viser -->
 
 ## Part 1: Fit a Neural Field to a 2D Image
 
@@ -632,12 +632,12 @@ Make sure your submission includes all of the following:
 - PSNR curve on the validation set
 - Spherical rendering video of the Lego using provided test cameras
 
-## Part 2.6: Training with Your Own Data
+<!-- ## Part 2.6: Training with Your Own Data
 
 - GIF of camera circling your object showing novel views
 - Discussion of code or hyperparameter changes you made
 - Plot of training loss over iterations
-- Intermediate renders of the scene during training
+- Intermediate renders of the scene during training -->
 
 <!-- ## Bells & Whistles (if applicable)
 
