@@ -510,13 +510,62 @@ assert torch.allclose(rendered_colors, correct, rtol=1e-4, atol=1e-4)
 
 ---
 
-<!-- ## Part 2.6: Training with your own data
+## Part 3: Training a NeRF with Your Own Data
 
-You will now use the dataset you created in part 0 to create a NeRF of your chosen object. After training a NeRF on your dataset render a gif of novel views from your scene. We have provided some starter code below which may be useful.
+We will now create a NeRF with our own real-world data. Our aim is to create an .npz file that contains the data in the same format as the Lego dataset, with some modifications.
 
-<!-- **[UPDATE 11/14/2025]**
+To get camera poses, we will use [COLMAP](https://colmap.github.io), a very popular SfM and MVS pipeline.
 
-The calibrated Lafufu Dataset can be found [here](/hws/hw4/assets/lafufu_dataset.npz). -->
+### Part 3.1 Capturing a Scene
+
+For best results, we want: 
+- Our scene to be object-centric, meaning we capture an object (such as a toy) and not a landscape or planar surface.
+  - Note: we don't want our object to be too small, otherwise there wouldn't be much parallax between views and COLMAP will struggle.
+- Our object to be textured, since COLMAP works best with textured scenes.
+- Our object to be centered in each image. Later, we'll want to center-crop each image and want to keep the object in the image.
+- Enough views of the object to be able to
+    1. Get good pose estimations.
+    2. Train an accurate NeRF.
+       - Even if we pass in, say, 100 views into COLMAP, COLMAP may only find poses for 20 of them, meaning we'd only have 20 views to train on. Ideally we have ~60 images to train the NeRF on like in the Lego dataset. You'll have to recapture the scene until COLMAP returns enough views with decent poses. 
+- The first image of the scene should be at the same height of the object and pointing at it directly. This will be used to determine the origin of the scene and will avoid a lot of headache when we create the gif later.
+
+### Part 3.2 Running COLMAP on the Captured Scene
+
+To create this custom dataset, you're welcome to use the provided code in this [Google Colab notebook](https://colab.research.google.com/drive/14jl4Qu_nXLnBOGyaVoc3RL7pNEt1dUTt?usp=sharing). At a high level, we need to:
+
+1. Capture images of the scene by one of the following methods:
+   1. Capturing individual photos (taking care to not change camera parameters between shots)
+   2. Recording a video around the object and subsampling frames to get enough views. You can play around with different subsampling rates to get enough views. **Course staff used this method.**
+2. Run COLMAP on the captured frames in step 1. Importantly:
+   1. COLMAP will work better on higher resolution images. That said, COLMAP is expensive to run and you will likely need to downsample your images for faster processing. Note: this means that the c2w matrices and focal lengths returned by COLMAP will be scaled down from the original scale of the captured scene. Later we will have to scale them back up to the original scale.
+   2. COLMAP may not give enough views (and therefore not enough training data) the first time around. You'll have to adjust the number of images you're passing into COLMAP, the resolution of these images that COLMAP uses, and may even have to recapture scenes (taking longer recordings or choosing scenes with more textures and parallax) until COLMAP returns decent enough views.
+   3. For consistency, we scale the c2w matrices and focal lengths returned by COLMAP back to the original scale of the captured scene. 
+3. Create the .npz file for our custom dataset. This means center cropping the images and downsampling to a resolution that is suitable for training the NeRF (in our case, 200x200 like in the Lego dataset). This means we also have to adjust the c2w matrices and focal lengths to reflect this change. **Important: this also means undistorting the images using something like cv2.undistort(img, camera_matrix, dist_coeffs)** since NeRF assumes a perfect pinhole camera model without distortion. 
+   - **Note**: the deliverable doesn't require test poses, and therefore we save all our posed images in the .npz file as `images_train`, `c2ws_train`, and `focal`. You are welcome to create train, validation, and test splits from this data as you see fit. For debugging, we recommend that you put aside ~5 images as a validation set and render them throughout training, like we did in part 2.
+4. Passing in this newly created .npz into part 3.3 below.
+
+<span style="color: red;">**[Impl]**</span> Run COLMAP on the captured scene and save the camera poses and intrinsics to a .npz file. Use your pipeline from part 2 to train this NeRF.
+
+### Part 3.3 Training the NeRF
+
+Use your code from part 2, swapping out the Lego .npz for your own and swapping hyperparameters as needed.
+
+Helpful Tips / Common Mistakes:
+
+- For the lego dataset, our near and far parameters were set to 2.0 and 6.0 respectively. You will likely have to adjust these for the real data you collect. These parameters represent the minimum and maximum distance away from the camera's sensor that we start and stop sampling. For our example we found that `near = 2.0` and `far = 6.0` worked well, but you will likely have to do some experimenting to find values that work for you. For example, others scenes required `near = 0.02` and `far = 0.5`.
+- You might want to increase the number of samples along your rays for your real data. This will take longer to train, but can improve visual quality of your NeRF. For our implementation we first trained with 32 samples in order to ensure that there are no issues or bugs in other parts of our code and then increased to 64 samples per ray to get our final result.
+- If training is taking an unreasonable amount of time, your image resolution may be the issue. Attempting to train with too large of images may take a long time. If you resize your images you need to ensure that your intrinsics matrix reflects this change either by resizing before doing calibration or adjusting the intrinsics matrix after recovering it.
+
+<span style="color: red;">**[Impl]**</span> Train a NeRF on your chosen object dataset collected in part 0. Make sure to save the training loss over iterations as well as to generate intermediate renders for the deliverables.
+
+### Part 3.4 Visualizing the Output
+For debugging purposes, look at the intermediate renders you created in part 3.3.
+
+For the deliverable, create a gif where the camera is orbiting the object and showing the rendered views. We encourage you to use the code below to help you visualize the scene. A couple of helpful tips:
+
+- Your axes may be flipped compared to the code below. You may need to play around with different axes of rotation.
+- Your scene scale will likely be different for each scene you capture. You will likely need to play around with the `near` and `far` parameters and the camera starting position to get the best results.
+  - For example, if it looks like your camera is only rotating around an axis but not translating around an object, you are likely too close to the scene origin and need to move back.
 
 ```python
 def look_at_origin(pos):
@@ -566,21 +615,19 @@ for phi in np.linspace(360., 0., NUM_SAMPLES, endpoint=False):
     frames.append(frame)
 ```
 
-Helpful Tips / Common Mistakes:
+<span style="color: darkgreen;">**[Deliverables]**</span> Create a gif of a camera circling the object showing novel views and discuss any code or hyperparameter changes you had to make. Include a plot of the training loss as well as some intermediate renders of the scene while it is training.
 
-- When using the test data our near and far parameters are set to 2.0 and 6.0 respectively. You will likely have to adjust these for the real data you collect. These parameters represent the minimum and maximum distance away from the camera's sensor that we start and stop sampling. For our example we found that near = 0.02 and far = 0.5 worked well, but you will likely have to do some experimenting to find values that work for you.
-- You might want to increase the number of samples along your rays for your real data. This will take longer to train, but can improve visual quality of your NeRF. For our implementation we first trained with 32 samples in order to ensure that there are no issues or bugs in other parts of our code and then increased to 64 samples per ray to get our final result.
-- If training is taking an unreasonable amount of time, your image resolution may be the issue. Attempting to train with too large of images may take a long time. If you resize your images you need to ensure that your intrinsics matrix reflects this change either by resizing before doing calibration or adjusting the intrinsics matrix after recovering it.
+<div style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+  <div>
+    <img src="/hws/hw4/assets/cookies_sample.jpg" alt="Sample Capture" style="max-width: 300px;">
+    <div style="text-align: center;">Sample training image</div>
+  </div>
+  <div>
+    <img src="/hws/hw4/assets/cookies.gif" alt="Orbit Render GIF" style="max-width: 300px;">
+    <div style="text-align: center;">Orbit render after training</div>
+  </div>
+</div>
 
-<span style="color: red;">**[Impl]**</span> Train a NeRF on your chosen object dataset collected in part 0. Make sure to save the training loss over iterations as well as to generate intermediate renders for the deliverables.
-
-<span style="color: darkgreen;">**[Deliverables]**</span> Create a gif of a camera circling the object showing novel views and discuss any code or hyperparameter changes you had to make. Include a plot of the training loss as well as some intermediate renders of the scene while it is training. -->
-
-<!-- ![Labubu NeRF](/hws/hw4/assets/labubu_nerf.gif)
-
-![Labubu Training at 500 iterations](/hws/hw4/assets/labubu_train_500.png) ![Labubu Training at 2000 iterations](/hws/hw4/assets/labubu_train_2000.png) ![Labubu Training at 6000 iterations](/hws/hw4/assets/labubu_train_6000.png)
-
-![Labubu Training Loss Statistics](/hws/hw4/assets/labubu_stats.png) -->
 
 ---
 
@@ -632,17 +679,17 @@ Make sure your submission includes all of the following:
 - PSNR curve on the validation set
 - Spherical rendering video of the Lego using provided test cameras
 
-<!-- ## Part 2.6: Training with Your Own Data
+## Part 3: Training with Your Own Data
 
 - GIF of camera circling your object showing novel views
 - Discussion of code or hyperparameter changes you made
 - Plot of training loss over iterations
-- Intermediate renders of the scene during training -->
+- Intermediate renders of the scene during training
 
-<!-- ## Bells & Whistles (if applicable)
+## Bells & Whistles (optional)
 
-- **CS 280A students:** Depth map video for the Lego scene
-- **Optional:** Any additional explorations you completed -->
+- Depth map video for the Lego scene
+- Any additional exploration you do!
 
 ## Acknowledgements
 
