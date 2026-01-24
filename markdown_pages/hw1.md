@@ -133,13 +133,15 @@ A few of the digitized glass plate images (both hi-res and low-res versions) wil
 
 Your program will take a glass plate image as input and produce a single color image as output. The program should divide the image into three equal parts and align the second and the third parts (e.x. G and R) to the first (B). For each image, you will need to print the (x,y) displacement vector that was used to align the parts.
 
+### Simple Alignment
+
 The easiest way to align the parts is to exhaustively search over a window of possible displacements (say `[-15,15]` pixels), score each one using some image matching metric, and take the displacement with the best score. There is a number of possible metrics that one could use to score how well the images match. The simplest one is just the L2 norm also known as the [Euclidean Distance](https://en.wikipedia.org/wiki/Euclidean_distance) which is simply $$\sqrt{\sum_{u,v} (I_1(u,v) - I_2(u,v))^2}$$ where the sum is taken over all pixels $$(u,v)$$ in the images. Another is [Normalized Cross-Correlation](https://en.wikipedia.org/wiki/Cross-correlation) (NCC), which is simply a dot product between two normalized vectors: $$\frac{\text{image1}}{\|\text{image1}\|}$$ and $$\frac{\text{image2}}{\|\text{image2}\|}$$.
 
 <figure style="float: right; width: 25%;">
   <img src="/hws/hw1/proj1_files/emir_example.png" alt="example negative" style="width: 100%;">
   <figcaption style="text-align: center;">example negative</figcaption>
 </figure>
-
+### Multi-Resolution Pyramid Alignment
 Exhaustive search will become prohibitively expensive if the pixel displacement is too large (which will be the case for high-resolution glass plate scans). In this case, you will need to implement a faster search procedure such as an image pyramid. An [image pyramid](https://en.wikipedia.org/wiki/Pyramid_(image_processing)) represents the image at multiple scales (usually scaled by a factor of 2) and the processing is done sequentially starting from the coarsest scale (smallest image) and going down the pyramid, updating your estimate as you go. It is very easy to implement by adding recursive calls to your original single-scale implementation. You should implement the pyramid functionality yourself using appropriate downsampling techniques.
 
 **Your job** will be to implement an algorithm that, given a 3-channel image, produces a color image as output. Implement a simple single-scale version first, using for loops, searching over a user-specified window of displacements. The above directory has skeleton Python code that will help you get started and you should pick one of the smaller `.jpg` images in the directory to test this version of the code. Next, add a coarse-to-fine pyramid speedup to handle large images like the `.tif` ones provided in the directory.
