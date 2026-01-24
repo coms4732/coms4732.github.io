@@ -6,6 +6,18 @@ toc: true
 nav_order: 2
 ---
 
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+MathJax = {
+tex: {
+inlineMath: [['$', '$'], ['\\(', '\\)']],
+displayMath: [['$$', '$$'], ['\\[', '\\]']],
+processEscapes: true
+}
+};
+</script>
+
 <style>
   h1 {
     font-size: x-large;
@@ -102,7 +114,7 @@ nav_order: 2
   <img src="/hws/hw1/proj1_files/image001.jpg" alt="Red-Green-Blue Example"><br>
   Images of the Russian Empire:<br>
   <i>Colorizing the <a href="https://www.loc.gov/collections/prokudin-gorskii/">Prokudin-Gorskii</a> photo collection</i><br>
-  <b style="color:#9E0000">Due Date: TBD</b>
+  <b style="color:#9E0000">Due Date: Thursday, February 5 at 11:59 PM EST </b>
 </h2>
 
 ## Background
@@ -117,21 +129,25 @@ Some starter code is available in [Python](/hws/hw1/starter_code.txt); do not fe
 
 ## Details
 
-<img src="/hws/hw1/proj1_files/image003.jpg" alt="example negative" style="float: right">
-
-A few of the digitized glass plate images (both hi-res and low-res versions) will be placed in the following zip file (note that the filter order from top to bottom is BGR, not RGB!): [data.zip](https://drive.google.com/file/d/1kxitAaJHwijL9tdCLVLXRxI8cvWrLPGP/view?usp=share_link) ([online gallery for preview](/hws/hw1/gallery/)).
+A few of the digitized glass plate images (both hi-res and low-res versions) will be placed in the following zip file (note that the filter order from top to bottom is BGR, not RGB!): [data.zip](https://drive.google.com/file/d/1nYdWKBnqxFmvB_DXE-giQEjwvBfPH2Ks/view?usp=share_link) ([online gallery for preview](/hws/hw1/gallery/)).
 
 Your program will take a glass plate image as input and produce a single color image as output. The program should divide the image into three equal parts and align the second and the third parts (e.x. G and R) to the first (B). For each image, you will need to print the (x,y) displacement vector that was used to align the parts.
 
-The easiest way to align the parts is to exhaustively search over a window of possible displacements (say `[-15,15]` pixels), score each one using some image matching metric, and take the displacement with the best score. There is a number of possible metrics that one could use to score how well the images match. The simplest one is just the L2 norm also known as the **Euclidean Distance** which is simply `sqrt(sum(sum((image1-image2).^2)))` where the sum is taken over the pixel values. Another is **Normalized Cross-Correlation** (NCC), which is simply a dot product between two normalized vectors: (`image1/||image1||` and `image2/||image2||`).
+The easiest way to align the parts is to exhaustively search over a window of possible displacements (say `[-15,15]` pixels), score each one using some image matching metric, and take the displacement with the best score. There is a number of possible metrics that one could use to score how well the images match. The simplest one is just the L2 norm also known as the [Euclidean Distance](https://en.wikipedia.org/wiki/Euclidean_distance) which is simply $$\sqrt{\sum_{u,v} (I_1(u,v) - I_2(u,v))^2}$$ where the sum is taken over all pixels $$(u,v)$$ in the images. Another is [Normalized Cross-Correlation](https://en.wikipedia.org/wiki/Cross-correlation) (NCC), which is simply a dot product between two normalized vectors: $$\frac{\text{image1}}{\|\text{image1}\|}$$ and $$\frac{\text{image2}}{\|\text{image2}\|}$$.
 
-Exhaustive search will become prohibitively expensive if the pixel displacement is too large (which will be the case for high-resolution glass plate scans). In this case, you will need to implement a faster search procedure such as an image pyramid. An image pyramid represents the image at multiple scales (usually scaled by a factor of 2) and the processing is done sequentially starting from the coarsest scale (smallest image) and going down the pyramid, updating your estimate as you go. It is very easy to implement by adding recursive calls to your original single-scale implementation. You should implement the pyramid functionality yourself using appropriate downsampling techniques.
+<figure style="float: right; width: 25%;">
+  <img src="/hws/hw1/proj1_files/emir_example.png" alt="example negative" style="width: 100%;">
+  <figcaption style="text-align: center;">example negative</figcaption>
+</figure>
+
+Exhaustive search will become prohibitively expensive if the pixel displacement is too large (which will be the case for high-resolution glass plate scans). In this case, you will need to implement a faster search procedure such as an image pyramid. An [image pyramid](https://en.wikipedia.org/wiki/Pyramid_(image_processing)) represents the image at multiple scales (usually scaled by a factor of 2) and the processing is done sequentially starting from the coarsest scale (smallest image) and going down the pyramid, updating your estimate as you go. It is very easy to implement by adding recursive calls to your original single-scale implementation. You should implement the pyramid functionality yourself using appropriate downsampling techniques.
 
 **Your job** will be to implement an algorithm that, given a 3-channel image, produces a color image as output. Implement a simple single-scale version first, using for loops, searching over a user-specified window of displacements. The above directory has skeleton Python code that will help you get started and you should pick one of the smaller `.jpg` images in the directory to test this version of the code. Next, add a coarse-to-fine pyramid speedup to handle large images like the `.tif` ones provided in the directory.
 
-Note that in the case like the Emir of Bukhara (show on right), the images to be matched do not actually have the same brightness values (they are different color channels), so you might have to use a cleverer metric, or different features than the raw pixels. This image is a great candidate for a *Bells & Whistles* extension if you want to explore more advanced alignment strategies or heuristics.
+**Performance Improvements (part of bells & whistles)**: note that in the case like the Emir of Bukhara (shown on right), the images to be matched do not actually have the same brightness values (they are different color channels), so you might have to use a cleverer metric, or different features than the raw pixels. The standard approach that worked for the other images [likely will not suffice for this image](#common-questions). This image is a great candidate for a *Bells & Whistles* extension if you want to explore more advanced alignment strategies or heuristics. Additionally, some scenes containing people may struggle to be aligned properly due to them moving between frames. You could try using common objects as an anchor to align these images (also bells & whistles).
 
-However, for grading, we allow up to **one** image (out of the original 14, excluding your own) to be misaligned in your final results; aim to get the rest properly aligned.
+
+However, for grading, we allow up to **one** image (out of the original 14, excluding your own) to be misaligned in your final results; aim to get the rest properly aligned (see grading breakdown below).
 
 ## Bells & Whistles (Optional)
 
@@ -151,23 +167,21 @@ Although the color images resulting from this automatic procedure will often loo
 
 ## Deliverables
 
-<!-- For this project, you must submit both your code and a project webpage as [described here](../submitting.html).
+For this assignment, you must submit both your code and a webpage written as an `index.html` with pointers to images/assets. You must also submit a `README.md` file that outlines how to run your code.
 
-The project webpage is your presentation of your work. Imagine that you are writing a blog post about your project for your friends. A good blog post is easy to read and follow, well organized, and visually appealing.
+The webpage is your presentation of your work. Imagine that you are writing a blog post about your work for your friends. A good blog post is easy to read and follow, well organized, and visually appealing.
 
-When you introduce new concepts or tricks that improve your results, explain them along the way and show the improved results of your algorithm on example images.
+When you introduce new concepts or tricks that improve your results, briefly explain them along the way and show the improved results of your algorithm on example images.
 
-Below are the specific deliverables to keep in mind when writing your project webpage. -->
+Below are the specific deliverables to keep in mind when writing your webpage.
 
-- The results of a single-scale alignment (using NCC/L2 norm metrics) on the low-resolution images (JPEG files).
-- The results of a multi-scale pyramid alignment (using NCC/L2 norm metrics) on **all** of our examples (in the data .zip file). List the offsets you computed.
-- The results of your algorithm (using NCC/L2 norm metrics) on a few examples of your choosing, downloaded from the [Prokudin-Gorskii collection](https://www.loc.gov/collections/prokudin-gorskii/?st=grid).
+- The results of a single-scale alignment (using NCC/L2 norm metrics) on the low-resolution images (JPEG files). List the offsets you comptuted for each image.
+- The results of a multi-scale pyramid alignment (using NCC/L2 norm metrics) on **all** of our examples (in the data .zip file). List the offsets you computed for each image.
+- The results of your algorithm (using NCC/L2 norm metrics) on at least 3 examples of your choosing, downloaded from the [Prokudin-Gorskii collection](https://www.loc.gov/collections/prokudin-gorskii/?st=grid).
 - If your algorithm failed to align any image, provide a brief explanation of why.
 - Describe any bells and whistles you implemented.
 
-<!-- **Important:** Images are for the submission only. Do <u>not</u> upload image files (e.g., `.jpg`, `.png`, `.tif`). This keeps submissions small and avoids hitting Gradescope's 100 MB upload limit, which large image sets can easily exceed. -->
-
-**Important:** Submit only a pdf with all steps and results outlined, as images will make the submission too large.
+**Important:** Do <u>not</u> upload image files (e.g., `.jpg`, `.png`, `.tif`). This keeps submissions small and avoids hitting Gradescope's 100 MB upload limit, which large image sets can easily exceed. We will run your code with pointers to the original full size images.
 
 ## Final Advice
 
@@ -178,7 +192,7 @@ Below are the specific deliverables to keep in mind when writing your project we
 - Convert images to floats and the same scale (e.g., im2double/im2uint8). JPGs are uint8; TIFFs may be uint16.
 - Shift arrays with `np.roll`.
 - Ignore borders when scoring; compute metrics on interior pixels.
-- Save outputs as JPG to reduce disk usage.
+- Save outputs as JPG to reduce disk/submission size usage.
 
 ## Grading Rubric
 
@@ -194,10 +208,10 @@ This assignment will be graded out of **100** points, as follows:
   </ul>
   <p><b>For presentation:</b></p>
   <ul>
-    <li><b>+50%:</b> Thorough explanation / approach / good presentation.</li>
-    <li><b>+30%:</b> Explanation present, could go further in depth.</li>
-    <li><b>+20%:</b> Minimal explanation in submission.</li>
-    <li><b>0%:</b> No section / no explanation in submission.</li>
+    <li><b>+50%:</b> Results cleanly presented. All requested images shown.</li>
+    <li><b>+30%:</b> Results cleanly presented. Not all requested images shown.</li>
+    <li><b>+20%:</b> Results not presented cleanly, formatted poorly.</li>
+    <li><b>0%:</b> No results presented.</li>
   </ul>
 </div>
 
@@ -213,11 +227,10 @@ This assignment will be graded out of **100** points, as follows:
   </ul>
   <p><b>For presentation:</b></p>
   <ul>
-    <li><b>+50%:</b> Thorough explanation, walking through each step carefully (e.g., NCC / L2).</li>
-    <li><b>+40%:</b> Explains motivation / approach / good presentation.</li>
-    <li><b>+30%:</b> Explanation present, could go further in depth.</li>
-    <li><b>+20%:</b> Minimal explanation in submission.</li>
-    <li><b>0%:</b> No explanation in submission.</li>
+    <li><b>+50%:</b> Results cleanly presented. All requested images shown.</li>
+    <li><b>+30%:</b> Results cleanly presented. Not all requested images shown.</li>
+    <li><b>+20%:</b> Results not presented cleanly, formatted poorly.</li>
+    <li><b>0%:</b> No results presented.</li>
   </ul>
 </div>
 
