@@ -169,7 +169,7 @@ Although the color images resulting from this automatic procedure will often loo
 
 ## Deliverables
 
-For this assignment, you must submit both your code and a webpage written as an `index.html` with pointers to images/assets. You must also submit a `README.md` file that outlines how to run your code.
+For this assignment, you must submit both your code and a webpage written as an `index.html` with pointers to images/assets. You must also submit a `README.md` file that outlines how to run your code. Lastly, submit a PDF version of your webpage.
 
 The webpage is your presentation of your work. Imagine that you are writing a blog post about your work for your friends. A good blog post is easy to read and follow, well organized, and visually appealing.
 
@@ -235,6 +235,8 @@ This assignment will be graded out of **100** points, as follows:
     <li><b>0%:</b> No results presented.</li>
   </ul>
 </div>
+
+**Important:** We will also deduct points if submission instructions are not followed.
 
 ## Common Questions
 
