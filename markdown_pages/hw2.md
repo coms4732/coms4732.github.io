@@ -199,8 +199,7 @@ You will implement the latter: for your set of images, display the NNDR histogra
 
 You must submit results for **2 different scenes / pairs of images**. The staff example images do not count.
 
-Submit your code, input images, and html webpage code, and hosted webpage to Gradescope. This should contain 2 scenes with visualizations like the ones shown below (with at least 1 of the 2 feature matching visualizations chosen):
-
+Submit your code, input images, and html webpage (index.html and assets folder), README.md to Gradescope as a .zip file. File size limit is 100MB. This should contain 2 scenes with visualizations like the ones shown below (with at least 1 of the 2 feature matching visualizations chosen):
 
 
 <div style="display: flex; flex-direction: column; gap: 1em; align-items: center;">
