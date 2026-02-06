@@ -4,7 +4,7 @@ layout: default
 permalink: /hw2/
 toc: true
 nav_order: 3
-published: false
+published: true
 ---
 
 <style>
@@ -104,7 +104,7 @@ published: false
     <img src="/hws/hw2/image003.gif" alt="Feature Matching Example 2">
   </div><br>
   AUTOMATIC FEATURE MATCHING ACROSS IMAGES<br>
-  <b style="color:#9E0000">Due Date: TBD</b>
+  <b style="color:#9E0000">Due Date: Thursday, February 19 at 11:59 PM EST</b>
 </h2>
 
 ## Background
@@ -115,27 +115,27 @@ We will loosely follow the paper ["Multi-Image Matching using Multi-Scale Orient
 
 ## Step 0: Taking photos (0 points, required)
 
-Take your 2 photos as you would a panoramic, remembering to keep your camera level, only rotating your camera but not translating it.
+Take your 2 photos as you would a panoramic, remembering to keep your camera level, only rotating your camera but not translating it. Additionally, make sure to lock the exposure and focus of your camera such that they don't change between the two photos.
 
 ## Step 1: Harris Corner Detection (5 points)
 
-- Start with Harris Interest Point Detector (Section 2). We won't worry about multi-scale – just do a single scale. Also, don't worry about sub-pixel accuracy. Re-implementing Harris is a thankless task – so you can use our sample code: [harris.py](/hws/hw1/starter_code.txt).
+- Start with Harris Interest Point Detector (Section 2). We won't worry about multi-scale – just do a single scale. Also, don't worry about sub-pixel accuracy. Re-implementing Harris is a thankless task – so you can use our sample code: [harris.py](/hws/hw2/starter_code.txt).
 
 ![Step 1 Deliverable](/hws/hw2/step1_deliverable.png)
 
 **Deliverables:** Show your 2 images, as-is, side-by-side. Also, show detected corners overlaid on your set of images side-by-side.
 ## Step 2: Non-Maximal Suppression (NMS) (15 points)
 
-Instead of the *Adaptive* Non-Maximal Suppression (ANMS) described in the paper, we will implement a simpler version of Non-Maximal Suppression (NMS) where we simply discard all corners that are not the local maximum in window with our choice of size. Report the window size you used.
+Instead of the *Adaptive* Non-Maximal Suppression (ANMS) described in the paper, we will implement a simpler version of Non-Maximal Suppression (NMS) where we simply discard all corners that are not the local maximum in a window with our choice of size. Report the window size you used.
 
 
 ![Step 2 Deliverable](/hws/hw2/step2_deliverable.png)
 
-**Deliverables:** Show chosen corners overlaid on your set of images side-by-side after applying ANMS.
+**Deliverables:** Show chosen corners overlaid on your set of images side-by-side after applying NMS.
 
 ## Step 3: Feature Descriptor Extraction (5 points)
 
-Implement Feature Descriptor extraction (Section 4 of the paper). Don't worry about rotation-invariance – just extract axis-aligned 8x8 patches. Note that it's extremely important to sample these patches from the larger 40x40 window to have a nice big blurred descriptor. Don't forget to bias/gain-normalize the descriptors. Ignore the wavelet transform section.
+Implement Feature Descriptor extraction (Section 4 of the paper). Don't worry about rotation-invariance – just extract axis-aligned 8x8 patches. The paper describes this in a confusing way, so here's a clarification: we just want to take a 40x40 patch around a corner and downsample it to 8x8. We turn on `anti_aliasing=True`, which internally applies a Gaussian blur before downsampling, via something like `downscaled_window = resize(window, (8, 8), anti_aliasing=True)`. This way, we have a nice blurred descriptor that doesn't have any aliasing artifacts. Don't forget to bias/gain-normalize the descriptors. Ignore the wavelet transform section.
 
 **Deliverables:** deliverable is part of step 4
 
@@ -168,7 +168,7 @@ You will implement the latter: for your set of images, display the NNDR histogra
    - Option 2: Draw green lines between matched features across both images side-by-side, and put red dots on the unmatched features.
   
   **Hint:** 
-  - These matches aren't supposed to be perfect. In the next HW (originally part of this HW) we use RANSAC to estimate the homography (geometry) that relates these two images. This is also known as "geometric validation" since we would only keep the matches that are consistent with the estimated homography/geometry.
+  - These matches aren't supposed to be perfect. In the next HW (HW3), we use RANSAC to estimate the homography (geometry) that relates these two images. This is also known as "geometric validation" since we would only keep the matches that are consistent with the estimated homography/geometry.
 
 <!-- ## Step 5: RANSAC to estimate the homography (40 points)
 
@@ -184,20 +184,20 @@ You will implement the latter: for your set of images, display the NNDR histogra
 
 - **RANSAC to estimate the homography:** Implement RANSAC to estimate the homography as described in the paper. This will yield better feature matches since they will have been geometrically verified by finding all the inliers according to the homography.
 
-- **Image Panoramic:** Create a panoramic image from the 2 images by stitching them together using the homography and blending the images together.
+- **Image Panorama:** Create a panoramic image from the 2 images by stitching them together using the homography and blending the images together.
 
 - **Rotation invariance:** Add rotation invariance to the MOPS feature descriptors.
 
 - **Support for 3+ images:** Implement support for 3+ images by using the homography to stitch together more than 2 images.
 
 ## Hints
-- You are *strongly encouraged to use LLMs* to implement any visualization code you wish. **Visualization code only**.
+- You are *strongly encouraged to use LLMs* to implement any visualization code you wish. Past iterations of this assignment (pre LLMs) had to code these up themselves! Lucky for you, these LLMs are in your pocket now. **You can only use LLMs for visualization code only**.
 - If you would like to visually debug using the staff example, the images can be found here: [img1.jpg](/hws/hw2/north1.jpg) and [img2.jpg](/hws/hw2/north2.jpg) 
 - You are encouraged to read the paper and discuss with other students what hyperparameters you used. Closer to the due date, staff may provide their own hyperparameters for the staff example.
 
 ## Deliverables
 
-You must submit results for **2 different scenes / pairs of images**. The staff example images does not count.
+You must submit results for **2 different scenes / pairs of images**. The staff example images do not count.
 
 Submit your code, input images, and html webpage code, and hosted webpage to Gradescope. This should contain 2 scenes with visualizations like the ones shown below (with at least 1 of the 2 feature matching visualizations chosen):
 

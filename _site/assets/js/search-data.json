@@ -43,7 +43,7 @@
   },"6": {
     "doc": "Homework 1",
     "title": "Deliverables",
-    "content": "For this assignment, you must submit both your code and a webpage written as an index.html with pointers to images/assets. You must also submit a README.md file that outlines how to run your code. The webpage is your presentation of your work. Imagine that you are writing a blog post about your work for your friends. A good blog post is easy to read and follow, well organized, and visually appealing. When you introduce new concepts or tricks that improve your results, briefly explain them along the way and show the improved results of your algorithm on example images. Below are the specific deliverables to keep in mind when writing your webpage. | The results of a single-scale alignment (using NCC/L2 norm metrics) on the low-resolution images (JPEG files). List the offsets you comptuted for each image. | The results of a multi-scale pyramid alignment (using NCC/L2 norm metrics) on all of our examples (in the data .zip file). List the offsets you computed for each image. | The results of your algorithm (using NCC/L2 norm metrics) on at least 3 examples of your choosing, downloaded from the Prokudin-Gorskii collection. | If your algorithm failed to align any image, provide a brief explanation of why. | Describe any bells and whistles you implemented. | . Important: Do not upload image files (e.g., .jpg, .png, .tif). This keeps submissions small and avoids hitting Gradescope’s 100 MB upload limit, which large image sets can easily exceed. We will run your code with pointers to the original full size images. ",
+    "content": "For this assignment, you must submit both your code and a webpage written as an index.html with pointers to images/assets. You must also submit a README.md file that outlines how to run your code. Lastly, submit a PDF version of your webpage. The webpage is your presentation of your work. Imagine that you are writing a blog post about your work for your friends. A good blog post is easy to read and follow, well organized, and visually appealing. When you introduce new concepts or tricks that improve your results, briefly explain them along the way and show the improved results of your algorithm on example images. Below are the specific deliverables to keep in mind when writing your webpage. | The results of a single-scale alignment (using NCC/L2 norm metrics) on the low-resolution images (JPEG files). List the offsets you comptuted for each image. | The results of a multi-scale pyramid alignment (using NCC/L2 norm metrics) on all of our examples (in the data .zip file). List the offsets you computed for each image. | The results of your algorithm (using NCC/L2 norm metrics) on at least 3 examples of your choosing, downloaded from the Prokudin-Gorskii collection. | If your algorithm failed to align any image, provide a brief explanation of why. | Describe any bells and whistles you implemented. | . Important: Do not upload image files (e.g., .jpg, .png, .tif). This keeps submissions small and avoids hitting Gradescope’s 100 MB upload limit, which large image sets can easily exceed. We will run your code with pointers to the original full size images. ",
     "url": "/hw1/#deliverables",
     
     "relUrl": "/hw1/#deliverables"
@@ -57,7 +57,7 @@
   },"8": {
     "doc": "Homework 1",
     "title": "Grading Rubric",
-    "content": "This assignment will be graded out of 100 points, as follows: . Single-scale alignment (60 points total) . For results: . | +50%: No alignment defects on \"cathedral,\" \"monastery,\" \"tobolsk.\" (Assume single‑scale is satisfied if pyramids work.) | +30%: Some defects on \"cathedral,\" \"monastery,\" \"tobolsk.\" | 0%: No effort on alignment. | . For presentation: . | +50%: Results cleanly presented. All requested images shown. | +30%: Results cleanly presented. Not all requested images shown. | +20%: Results not presented cleanly, formatted poorly. | 0%: No results presented. | . Multi-scale pyramid alignment (with NCC / L2) (40 points total) . For results: . | +50%: Alignment defects on ≤ 1 / 14 images. | +40%: Alignment defects on ≤ 3 / 14 images, or missing. | +30%: Alignment defects on ≤ 6 / 14 images, or missing. | +20%: Alignment defects on &gt; 6 / 14 images, but effort shown. | 0%: No effort on alignment. | . For presentation: . | +50%: Results cleanly presented. All requested images shown. | +30%: Results cleanly presented. Not all requested images shown. | +20%: Results not presented cleanly, formatted poorly. | 0%: No results presented. | . ",
+    "content": "This assignment will be graded out of 100 points, as follows: . Single-scale alignment (60 points total) . For results: . | +50%: No alignment defects on \"cathedral,\" \"monastery,\" \"tobolsk.\" (Assume single‑scale is satisfied if pyramids work.) | +30%: Some defects on \"cathedral,\" \"monastery,\" \"tobolsk.\" | 0%: No effort on alignment. | . For presentation: . | +50%: Results cleanly presented. All requested images shown. | +30%: Results cleanly presented. Not all requested images shown. | +20%: Results not presented cleanly, formatted poorly. | 0%: No results presented. | . Multi-scale pyramid alignment (with NCC / L2) (40 points total) . For results: . | +50%: Alignment defects on ≤ 1 / 14 images. | +40%: Alignment defects on ≤ 3 / 14 images, or missing. | +30%: Alignment defects on ≤ 6 / 14 images, or missing. | +20%: Alignment defects on &gt; 6 / 14 images, but effort shown. | 0%: No effort on alignment. | . For presentation: . | +50%: Results cleanly presented. All requested images shown. | +30%: Results cleanly presented. Not all requested images shown. | +20%: Results not presented cleanly, formatted poorly. | 0%: No results presented. | . Important: We will also deduct points if submission instructions are not followed. ",
     "url": "/hw1/#grading-rubric",
     
     "relUrl": "/hw1/#grading-rubric"
@@ -83,20 +83,111 @@
     
     "relUrl": "/hw1/"
   },"12": {
+    "doc": "Homework 2",
+    "title": "\n    Homework 2\n    COMS4732: Computer Vision 2\n  ",
+    "content": ". ",
+    "url": "/hw2/",
+    
+    "relUrl": "/hw2/"
+  },"13": {
+    "doc": "Homework 2",
+    "title": "\n  \n    \n    \n  \n  AUTOMATIC FEATURE MATCHING ACROSS IMAGES\n  Due Date: Thursday, February 19 at 11:59 PM EST\n",
+    "content": " ",
+    "url": "/hw2/",
+    
+    "relUrl": "/hw2/"
+  },"14": {
+    "doc": "Homework 2",
+    "title": "Background",
+    "content": "This assignment will involve creating a system for automatically detecting corresponding features in 2 images. We will loosely follow the paper “Multi-Image Matching using Multi-Scale Oriented Patches” by Brown et al. but with several simplifications. Read the paper first and make sure you understand it at a high level, then we will implement parts of the algorithm. Note: we will implement a simpler version of Adaptive Non-Maximal Suppression (ANMS) instead of the version described in the paper - no worries if you don’t understand it fully. ",
+    "url": "/hw2/#background",
+    
+    "relUrl": "/hw2/#background"
+  },"15": {
+    "doc": "Homework 2",
+    "title": "Step 0: Taking photos (0 points, required)",
+    "content": "Take your 2 photos as you would a panoramic, remembering to keep your camera level, only rotating your camera but not translating it. Additionally, make sure to lock the exposure and focus of your camera such that they don’t change between the two photos. ",
+    "url": "/hw2/#step-0-taking-photos-0-points-required",
+    
+    "relUrl": "/hw2/#step-0-taking-photos-0-points-required"
+  },"16": {
+    "doc": "Homework 2",
+    "title": "Step 1: Harris Corner Detection (5 points)",
+    "content": ". | Start with Harris Interest Point Detector (Section 2). We won’t worry about multi-scale – just do a single scale. Also, don’t worry about sub-pixel accuracy. Re-implementing Harris is a thankless task – so you can use our sample code: harris.py. | . Deliverables: Show your 2 images, as-is, side-by-side. Also, show detected corners overlaid on your set of images side-by-side. ",
+    "url": "/hw2/#step-1-harris-corner-detection-5-points",
+    
+    "relUrl": "/hw2/#step-1-harris-corner-detection-5-points"
+  },"17": {
+    "doc": "Homework 2",
+    "title": "Step 2: Non-Maximal Suppression (NMS) (15 points)",
+    "content": "Instead of the Adaptive Non-Maximal Suppression (ANMS) described in the paper, we will implement a simpler version of Non-Maximal Suppression (NMS) where we simply discard all corners that are not the local maximum in a window with our choice of size. Report the window size you used. Deliverables: Show chosen corners overlaid on your set of images side-by-side after applying NMS. ",
+    "url": "/hw2/#step-2-non-maximal-suppression-nms-15-points",
+    
+    "relUrl": "/hw2/#step-2-non-maximal-suppression-nms-15-points"
+  },"18": {
+    "doc": "Homework 2",
+    "title": "Step 3: Feature Descriptor Extraction (5 points)",
+    "content": "Implement Feature Descriptor extraction (Section 4 of the paper). Don’t worry about rotation-invariance – just extract axis-aligned 8x8 patches. The paper describes this in a confusing way, so here’s a clarification: we just want to take a 40x40 patch around a corner and downsample it to 8x8. We turn on anti_aliasing=True, which internally applies a Gaussian blur before downsampling, via something like downscaled_window = resize(window, (8, 8), anti_aliasing=True). This way, we have a nice blurred descriptor that doesn’t have any aliasing artifacts. Don’t forget to bias/gain-normalize the descriptors. Ignore the wavelet transform section. Deliverables: deliverable is part of step 4 . ",
+    "url": "/hw2/#step-3-feature-descriptor-extraction-5-points",
+    
+    "relUrl": "/hw2/#step-3-feature-descriptor-extraction-5-points"
+  },"19": {
+    "doc": "Homework 2",
+    "title": "Step 4: Feature Matching (15 points)",
+    "content": "Implement Feature Matching (Section 5 of the paper). That is, you will need to find pairs of features that look similar and are thus likely to be good matches. There are 2 approaches for this: . | Nearest neighbor matching: Find the nearest neighbor for each feature in the other image and check if the distance is less than some threshold. | Lowe’s ratio test / NN distance ratio (NNDR): . | Threshold on the ratio between the first and the second nearest neighbors. Consult Figure 6b in the paper for picking the threshold. Ignore Section 6 of the paper. | The idea here is that a good descriptor from img2 should be significantly better than the other img2 descriptor candidates while still being close to the img1 descriptor. | . | . You will implement the latter: for your set of images, display the NNDR histogram and highlight the threshold you used. Deliverables: . | Display the NNDR histogram and highlight the threshold you used. Also specify which similarity metric you used (e.g. SSD, NCC, etc.). | Visualize the 5 best feature matches between the 2 images (no worries if you don’t have 10 matches, just show as many as you can). | the first column should be the feature descriptor for img1’s feature. | the second column should be the 1NN feature descriptor from img2. | the third column should be the 2NN feature descriptor from img2. | . | Visualize the matches using one of the 2 options: . | Option 1: Color-code the matched features across both images and display them side-by-side. Also, put a number next to each feature to indicate the match index. | Option 2: Draw green lines between matched features across both images side-by-side, and put red dots on the unmatched features. | . | . Hint: . | These matches aren’t supposed to be perfect. In the next HW (HW3), we use RANSAC to estimate the homography (geometry) that relates these two images. This is also known as “geometric validation” since we would only keep the matches that are consistent with the estimated homography/geometry. | . ",
+    "url": "/hw2/#step-4-feature-matching-15-points",
+    
+    "relUrl": "/hw2/#step-4-feature-matching-15-points"
+  },"20": {
+    "doc": "Homework 2",
+    "title": "Bells &amp; Whistles (Optional)",
+    "content": ". | Adaptive Non-Maximal Suppression (ANMS): Implement Adaptive Non-Maximal Suppression (ANMS) as described in the paper. | RANSAC to estimate the homography: Implement RANSAC to estimate the homography as described in the paper. This will yield better feature matches since they will have been geometrically verified by finding all the inliers according to the homography. | Image Panorama: Create a panoramic image from the 2 images by stitching them together using the homography and blending the images together. | Rotation invariance: Add rotation invariance to the MOPS feature descriptors. | Support for 3+ images: Implement support for 3+ images by using the homography to stitch together more than 2 images. | . ",
+    "url": "/hw2/#bells--whistles-optional",
+    
+    "relUrl": "/hw2/#bells--whistles-optional"
+  },"21": {
+    "doc": "Homework 2",
+    "title": "Hints",
+    "content": ". | You are strongly encouraged to use LLMs to implement any visualization code you wish. Past iterations of this assignment (pre LLMs) had to code these up themselves! Lucky for you, these LLMs are in your pocket now. You can only use LLMs for visualization code only. | If you would like to visually debug using the staff example, the images can be found here: img1.jpg and img2.jpg | You are encouraged to read the paper and discuss with other students what hyperparameters you used. Closer to the due date, staff may provide their own hyperparameters for the staff example. | . ",
+    "url": "/hw2/#hints",
+    
+    "relUrl": "/hw2/#hints"
+  },"22": {
+    "doc": "Homework 2",
+    "title": "Deliverables",
+    "content": "You must submit results for 2 different scenes / pairs of images. The staff example images do not count. Submit your code, input images, and html webpage code, and hosted webpage to Gradescope. This should contain 2 scenes with visualizations like the ones shown below (with at least 1 of the 2 feature matching visualizations chosen): . ",
+    "url": "/hw2/#deliverables",
+    
+    "relUrl": "/hw2/#deliverables"
+  },"23": {
+    "doc": "Homework 2",
+    "title": "Acknowledgements",
+    "content": "This assignment is based on Alyosha Efros’s version at Berkeley. ",
+    "url": "/hw2/#acknowledgements",
+    
+    "relUrl": "/hw2/#acknowledgements"
+  },"24": {
+    "doc": "Homework 2",
+    "title": "Homework 2",
+    "content": " ",
+    "url": "/hw2/",
+    
+    "relUrl": "/hw2/"
+  },"25": {
     "doc": "Home",
     "title": "COMS4732 - Computer Vision 2",
     "content": "Welcome to the course homepage. Select a homework assignment below: . ",
     "url": "/#coms4732---computer-vision-2",
     
     "relUrl": "/#coms4732---computer-vision-2"
-  },"13": {
+  },"26": {
     "doc": "Home",
     "title": "Homework Assignments",
-    "content": ". | Homework 1 | . ",
+    "content": ". | Homework 1 | Homework 2 | . ",
     "url": "/#homework-assignments",
     
     "relUrl": "/#homework-assignments"
-  },"14": {
+  },"27": {
     "doc": "Home",
     "title": "Home",
     "content": " ",
