@@ -178,6 +178,11 @@ You will implement the latter: for your set of images, display the NNDR histogra
 
 **Deliverables:** Show the inliers associated with the best homography found with RANSAC. -->
 
+## Extra credit: Image Stitching/Panorama (10 points to be used on entire HW category in class)
+From at least 2 images, create an image panorama by stitching them together. This means using RANSAC to estimate the homography that relates the images, then stitching them together by warping one image via the homography, performing inverse warping, then blending the images together. You are welcome to use any libraries you want to do this, but *you must use the features you computed in the previous steps*. 
+
+**HW extra credit in this class will work as follows**: you can get up to 10 points of extra credit for completing this part. This can go towards any points you miss on homeworks in this class (meaning all 5 assignments), but it cannot bring you past 100% in the HW category. 
+
 ## Bells & Whistles (Optional)
 
 - **Adaptive Non-Maximal Suppression (ANMS):** Implement Adaptive Non-Maximal Suppression (ANMS) as described in the paper.

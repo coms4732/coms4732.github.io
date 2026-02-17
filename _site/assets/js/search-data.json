@@ -140,54 +140,61 @@
     "relUrl": "/hw2/#step-4-feature-matching-15-points"
   },"20": {
     "doc": "Homework 2",
+    "title": "Extra credit: Image Stitching/Panorama (10 points to be used on entire HW category in class)",
+    "content": "From at least 2 images, create an image panorama by stitching them together. This means using RANSAC to estimate the homography that relates the images, then stitching them together by warping one image via the homography, performing inverse warping, then blending the images together. You are welcome to use any libraries you want to do this, but you must use the features you computed in the previous steps. HW extra credit in this class will work as follows: you can get up to 10 points of extra credit for completing this part. This can go towards any points you miss on homeworks in this class (meaning all 5 assignments), but it cannot bring you past 100% in the HW category. ",
+    "url": "/hw2/#extra-credit-image-stitchingpanorama-10-points-to-be-used-on-entire-hw-category-in-class",
+    
+    "relUrl": "/hw2/#extra-credit-image-stitchingpanorama-10-points-to-be-used-on-entire-hw-category-in-class"
+  },"21": {
+    "doc": "Homework 2",
     "title": "Bells &amp; Whistles (Optional)",
     "content": ". | Adaptive Non-Maximal Suppression (ANMS): Implement Adaptive Non-Maximal Suppression (ANMS) as described in the paper. | RANSAC to estimate the homography: Implement RANSAC to estimate the homography as described in the paper. This will yield better feature matches since they will have been geometrically verified by finding all the inliers according to the homography. | Image Panorama: Create a panoramic image from the 2 images by stitching them together using the homography and blending the images together. | Rotation invariance: Add rotation invariance to the MOPS feature descriptors. | Support for 3+ images: Implement support for 3+ images by using the homography to stitch together more than 2 images. | . ",
     "url": "/hw2/#bells--whistles-optional",
     
     "relUrl": "/hw2/#bells--whistles-optional"
-  },"21": {
+  },"22": {
     "doc": "Homework 2",
     "title": "Hints",
     "content": ". | You are strongly encouraged to use LLMs to implement any visualization code you wish. Past iterations of this assignment (pre LLMs) had to code these up themselves! Lucky for you, these LLMs are in your pocket now. You can only use LLMs for visualization code only. | If you would like to visually debug using the staff example, the images can be found here: img1.jpg and img2.jpg | You are encouraged to read the paper and discuss with other students what hyperparameters you used. Closer to the due date, staff may provide their own hyperparameters for the staff example. | . ",
     "url": "/hw2/#hints",
     
     "relUrl": "/hw2/#hints"
-  },"22": {
+  },"23": {
     "doc": "Homework 2",
     "title": "Deliverables",
     "content": "You must submit results for 2 different scenes / pairs of images. The staff example images do not count. Submit your code, input images, and html webpage (index.html and assets folder), README.md to Gradescope as a .zip file. File size limit is 100MB. This should contain 2 scenes with visualizations like the ones shown below (with at least 1 of the 2 feature matching visualizations chosen): . ",
     "url": "/hw2/#deliverables",
     
     "relUrl": "/hw2/#deliverables"
-  },"23": {
+  },"24": {
     "doc": "Homework 2",
     "title": "Acknowledgements",
     "content": "This assignment is based on Alyosha Efros’s version at Berkeley. ",
     "url": "/hw2/#acknowledgements",
     
     "relUrl": "/hw2/#acknowledgements"
-  },"24": {
+  },"25": {
     "doc": "Homework 2",
     "title": "Homework 2",
     "content": " ",
     "url": "/hw2/",
     
     "relUrl": "/hw2/"
-  },"25": {
+  },"26": {
     "doc": "Home",
     "title": "COMS4732 - Computer Vision 2",
     "content": "Welcome to the course homepage. Select a homework assignment below: . ",
     "url": "/#coms4732---computer-vision-2",
     
     "relUrl": "/#coms4732---computer-vision-2"
-  },"26": {
+  },"27": {
     "doc": "Home",
     "title": "Homework Assignments",
     "content": ". | Homework 1 | Homework 2 | . ",
     "url": "/#homework-assignments",
     
     "relUrl": "/#homework-assignments"
-  },"27": {
+  },"28": {
     "doc": "Home",
     "title": "Home",
     "content": " ",
