@@ -3,8 +3,8 @@ title: Homework 3
 layout: default
 permalink: /hw3/
 toc: true
-nav_order: 4
-published: false
+nav_exclude: true
+published: true
 ---
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -101,6 +101,25 @@ processEscapes: true
   .rubric h5 {
     margin: 0.25em 0;
   }
+
+  /* Collapsible section styles */
+  details.section {
+    margin: 0.5em 0;
+  }
+
+  details.section > summary {
+    font-size: x-large;
+    text-align: left;
+    font-variant: small-caps;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0.25em 0;
+    list-style: revert;
+  }
+
+  details.section > summary::-webkit-details-marker {
+    display: initial;
+  }
 </style>
 
 <header>
@@ -111,529 +130,353 @@ processEscapes: true
 </header>
 
 <h2 style="text-align: center;">
-  <!-- <div style="display: flex; justify-content: center; gap: 1em; align-items: center; flex-wrap: wrap;">
-    <img src="/hws/hw2/image002.gif" alt="Feature Matching Example">
-    <img src="/hws/hw2/image003.gif" alt="Feature Matching Example 2">
-  </div><br> -->
-  Simple Structure from Motion<br>
-  <b style="color:#9E0000">Due Date: TBD</b>
+  SIMPLE STRUCTURE FROM MOTION<br>
+  <b style="color:#9E0000">Due Date: Thursday, March 5 11:59PM ET</b>
 </h2>
 
-# Background
-
-This assignment will involve determining the 3D position, or pose, of multiple cameras in a scene. We will build off of homework 2's feature matching algorithm and modify RANSAC.
-
-<br>
-**Important:** this assignment largely depends on homework 2. Please make sure you have completed it before starting this assignment.
-<br>
-<br>
-**Important:** the overview isn't exhaustive. You are expected to have attended lecture.
-
-## Problem statement
-
-<div style="text-align: center;">
-  <figure style="display: inline-block; margin: 1em 0;">
-    <img src="/hws/hw3/assets/problem_statement.png" alt="Problem statement diagram" style="max-width: 100%;">
-    <figcaption style="margin-top: 0.5em; font-style: italic;">
-      <strong>Figure 1:</strong> Left: 3D problem space: you may or may not have 2D correspondences, 3D camera positions/motion, or 3D structure for a given 3D scene. <br> Right: this homework will focus on when we know nothing about the scene.
-    </figcaption>
-  </figure>
+<div style="text-align: center; margin: 1em 0;">
+  <img src="/hws/hw3/assets/problem_statement_new.png" alt="Problem statement diagram" style="max-width: 100%;">
 </div>
 
-In the previous assignment, we computed correspondences between features in two images. The goal of this assignment is to similarly find correspondences between features in multiple images that will then be used to estimate the camera poses in the scene. Lastly, we will perform triangulation to also use the camera poses to estimate the 3D structure of the scene.
+<span style="color: darkgreen;">**Starter code can be found [here](https://github.com/coms4732/hw3_starter_testing/).**</span>
 
-### Epipolar Geometry
+<p style="font-size: 0.85em; margin: 0.5em 1em;">
+  <a href="javascript:void(0)" id="toggle-all" onclick="(function(){var d=document.querySelectorAll('details.section'),open=d[0]&&!d[0].open;d.forEach(function(el){el.open=open});document.getElementById('toggle-all').textContent=open?'Collapse all':'Expand all'})()">Collapse all</a>
+</p>
 
+<details open class="section" markdown="1">
+<summary id="overview">Overview</summary>
+In this assignment, you'll build components of a simple [Structure from Motion (SfM)](https://en.wikipedia.org/wiki/Structure_from_motion) pipeline that estimates correspondences, camera position/motion, and 3D scene points from a pair of images. By the end of this assignment, you'll be able to generate a sparse point cloud and visualize the rotation and translation that relates the 2 cameras. 
 
+For full credit, you only have to achieve a working solution on the staff-provided images ([img1_1280x960.jpeg](/hws/hw3/assets/img1_1280x960.jpeg), [img2_1280x960.jpeg](/hws/hw3/assets/img2_1280x960.jpeg)). If you wish to improve the pipeline on your own and potentially achieve a denser point cloud, you may want to utilize the original-resolution images ([img1_5712x4284.jpeg](/hws/hw3/assets/img1_5712x4284.jpeg), [img2_5712x4284.jpeg](/hws/hw3/assets/img2_5712x4284.jpeg)).
 
-
-
-# Step 1: Feature extraction
-
-In HW2 we used Harris corners as a simple feature. Because the task of SfM involves finding correspondences between images whose cameras have been translated and rotated relative to each other, we need to use a more robust feature, particularly one that is invariant to rotation. We will use SIFT (Scale-Invariant Feature Transform) features.
-
-Here's how to use SIFT in OpenCV:
-
-```python
-import cv2
-
-# Create SIFT detector, detecting at most max_features features
-sift = cv2.SIFT_create(nfeatures=max_features)
-
-# Detect keypoints and compute descriptors
-keypoints, descriptors = sift.detectAndCompute(img_uint8, None)
-
-if descriptors is None or len(keypoints) == 0:
-    print(f"WARNING: No SIFT features detected!")
-    return np.array([[], []]), np.array([])
-
-# Extract coordinates in (x, y) format from keypoints
-coords_xy = np.array([kp.pt for kp in keypoints])  # (N, 2) in (x, y)
-```
-
-Note: SIFT has keypoint selection baked in according to the `max_features` best keypoints. As such, we don't need to perform ANMS here.
-
-
-# Step 2: Feature matching
-
-Now, as we did in HW2, we need to find correspondences between features in multiple images. We will use the same approach of visualizing the nearest neighbor distance ratio (NNDR) and setting a threshold on which matched descriptors we'll keep. 
-
-**Note:** With SIFT, L2 is typically used to measure the similarity between descriptors, whereas in HW2 we used NCC.
-
-# Step 3: RANSAC to estimate camera pose
-
-<div style="text-align: center;">
-  <figure style="display: inline-block; margin: 1em 0;">
-    <img src="/hws/hw3/assets/correspondences_to_pose.png" alt="Correspondences to pose diagram" style="max-width: 100%;">
-    <figcaption style="margin-top: 0.5em; font-style: italic;">
-      <strong>Figure 2:</strong> Step 3 aims to recover the motion of both cameras, which is another way of saying the rotation $R$ and translation $t$ between our two cameras.
-    </figcaption>
-  </figure>
+<div style="text-align: center; margin: 1em 0;">
+  <div style="display: flex; justify-content: center; gap: 1em; align-items: center; flex-wrap: wrap;">
+    <img src="/hws/hw3/assets/img1_5712x4284.jpeg" alt="Image 1" style="max-width: 48%; height: auto;">
+    <img src="/hws/hw3/assets/img2_5712x4284.jpeg" alt="Image 2" style="max-width: 48%; height: auto;">
+  </div>
+  <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;">Ryan's living room out of equilibrium</p>
 </div>
 
-Whereas in HW2 we used RANSAC to estimate the homography that relates two images, here we will use RANSAC to estimate the camera poses that relate two images. We do this via epipola geometry.
+If you're interested in why this setup is the way it is and how to optimally capture your own scene, see instructions below on [capturing your own scene](#capturing-your-own-scene).
 
-<div style="text-align: center;">
-  <figure style="display: inline-block; margin: 1em 0;">
-    <img src="/hws/hw3/assets/epipolar1.png" alt="Epipolar geometry setup" style="max-width: 100%;">
-    <figcaption style="margin-top: 0.5em; font-style: italic;">
-      <strong>Figure 3:</strong> Epipolar geometry relates two camera views of the same 3D point.
-    </figcaption>
-  </figure>
+</details>
+
+<details open class="section" markdown="1">
+<summary>Step 1: Computing Camera Intrinsics (15 points)</summary>
+
+This assignment involves stereo on *calibrated cameras*, meaning with known [camera intrinsics](https://en.wikipedia.org/wiki/Camera_resectioning). Note that the more general version of SfM uses uncalibrated cameras–meaning we don't know the intrinsics–though we leave this as an exercise to the reader.
+
+Step 1 of this pipeline involves computing the intrinsic matrix $K$ for the camera associated with the images used:
+
+$$K = \begin{bmatrix} f_\text{px} & 0 & c_x \\ 0 & f_\text{px} & c_y \\ 0 & 0 & 1 \end{bmatrix}, \qquad c_x = \frac{W_\text{px}}{2},\quad c_y = \frac{H_\text{px}}{2}$$
+
+  where $f_\text{px}$ is the camera focal length in terms of number of pixels, $W_\text{px}$ is the number of horizontal pixels and $H_\text{px}$ is the number of vertical pixels, and $(c_x, c_y)$ is the principal point at the center of the image plane (i.e., center of image).
+
+For the staff-provided images (captured with an iPhone 15 Pro on the main camera / 1x zoom):
+- physical focal length: $f_\text{mm} = 6.765$mm
+- physical camera sensor height: $h_\text{mm} = 7.318$mm
+- physical camera sensor width:  $w_\text{mm} = 9.757$mm
+
+From these physical parameters, we need to compute the focal length in pixels:
+
+$f_\text{px} = f_\text{mm} \cdot \frac{W_\text{px}}{w_\text{mm}}$
+
+Note that if we assume that the aspect ratio of the image width and height is the same as the aspect ratio of the sensor width and sensor height, then the pixels are square. Meaning, we could have equivalently computed $f_\text{px}$ from the image height and sensor height.
+
+From inspecting the image directly, we also have access to the image height $h_\text{px}=960$ and image width $w_\text{px} = 1280$. Thus, we have everything needed to compute our intrinsics matrix $K$.
+
+<span style="color: red;">**[Deliverable]**</span>
+- Implement `intrinsics.py`
+- Report what the $K$ matrix is for the staff-provided images. 
+  - Make sure to indicate which image resolution you're using.
+  - For chance of partial credit, show your work.
+
+</details>
+
+<details open class="section" markdown="1">
+<summary>Step 2: Detecting Features (10 points)</summary>
+
+In HW2 we used a Harris Corner detector to compute candidate features that we'd want to use as correspondences between the two images. Because the motion between the two images in this assignment is more extreme (rotation + translation), we need a more robust feature descriptor. As such, we use [SIFT features](https://en.wikipedia.org/wiki/Scale-invariant_feature_transform).
+
+<span style="color: red;">**[Deliverable]**</span>
+- Show a side-by-side of the SIFT features detected in your two images.
+- Report the SIFT parameters used to compute these features and the resulting number of features per image.
+
+<div style="text-align: center; margin: 1em 0;">
+  <img src="/hws/hw3/assets/step2.png" alt="SIFT features detected in both images" style="max-width: 100%; height: auto;">
+  <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;">SIFT features detected in both images, side-by-side</p>
 </div>
 
-Suppose 2D points $$x$$ and $$x'$$ are the projections of a 3D point $$X$$ onto the image planes of two cameras. The epipolar geometry relates these two points via the essential matrix $$E$$:
-$$
-x'^T E x = 0
-$$
+</details>
 
+<details open class="section" markdown="1">
+<summary>Step 3: Feature Matching (15 points)</summary>
 
-<div style="text-align: center;">
-  <figure style="display: inline-block; margin: 1em 0;">
-    <img src="/hws/hw3/assets/epipolar2.png" alt="Epipolar geometry setup" style="max-width: 100%;">
-    <figcaption style="margin-top: 0.5em; font-style: italic;">
-      <strong>Figure 3:</strong> Constructing the epipolar constraint.
-    </figcaption>
-  </figure>
+In HW2, we created feature descriptors then subsequently did an $n^2$ search between the features in image 1 and image 2, using a metric like SSD or NCC to compare the features. We also applied the ratio test between the 1NN and 2NN features in image 2 for a feature in image 1. This is the nearest neighbor distance ratio (NNDR).
+
+In this HW, the OpenCV SIFT API `cv2.SIFT_create` directly returns keypoints and feature descriptors––all that's left is to match the features between these images. We use an L2 loss to compare these features, as is typically done with SIFT. Since you've already implemented this in HW2, we provide code that uses a C++-optimized feature matching algorithm: `cv2.BFMatcher`. You still need to provide an NNDR threshold, like we did in HW2.
+
+<span style="color: red;">**[Deliverables]**</span>
+- Show the histogram of NNDR's for the scene. Indicate what threshold you used.
+- Show the top 5 feature descriptors according to NNDR.
+- Visualize side-by-side the correspondences. It's okay if it's slightly unclear what corresponds to what.
+
+<div style="display: flex; justify-content: center; align-items: center; gap: 1em; margin: 1em 0;">
+  <div style="flex: 1; text-align: center; min-width: 0;">
+    <img src="/hws/hw3/assets/step3.2.png" alt="Top 5 feature matches by NNDR" style="max-width: 100%; height: auto;">
+    <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.8em;">Top 5 feature matches by NNDR</p>
+  </div>
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 1em; min-width: 0;">
+    <div style="text-align: center;">
+      <img src="/hws/hw3/assets/step3.1.png" alt="NNDR histogram" style="max-width: 100%; height: auto;">
+      <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.8em;">NNDR histogram</p>
+    </div>
+    <div style="text-align: center;">
+      <img src="/hws/hw3/assets/step3.3.png" alt="Matched correspondences between images" style="max-width: 100%; height: auto;">
+      <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.8em;">Matched correspondences</p>
+    </div>
+  </div>
 </div>
 
-To see how we get here, we first observe that $x'$ is related to $x$ by a rotation and translation:
+</details>
 
-$$x' = R x + t$$
+<details open class="section" markdown="1">
+<summary>Step 4: RANSAC to estimate R and t (30 points)</summary>
 
-Where $t$ is the translation from camera 1's center of projection $$O$$ to camera 2's center of projection $$O'$$. $R$ is the rotation from camera 1's coordinate system to camera 2's coordinate system.
+Now we must estimate the rotation matrix $R$ and translation vector $t$ that relate camera 2 (from image 2) to camera 1 (from image 1). We treat camera 1's center as the origin. We do this via [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus) and [epipolar geometry](https://en.wikipedia.org/wiki/Epipolar_geometry). You are not expected to understand the epipolar geometry well, but **you are expected to understand how RANSAC can be used as a general method to estimate the parameters of some mathematical model for which we have data that contains inliers and outliers.** As such, you will be implementing parts of RANSAC in this HW.
 
-To relate the fact that $x$, $x'$, and $t$ are all coplanar, we define the normal vector to the plane as $n = t \times x'$ and substitute in the expression for $x'$:
+The mathematical model we hope to estimate is the rotation and translation that relates these two images. Using epipolar geometry, there is an [essential matrix](https://en.wikipedia.org/wiki/Essential_matrix) $E$ that relates the features between the images. We can use RANSAC to estimate $E$ and decompose it into $R$ and $t$ that relate the cameras. If you'd like to learn more about the underlying math, see the [appendix](#rt-ambiguity).
 
-$$
-\begin{aligned}
-n &= t \times x' \\
-n &= t \times (R x + t) \\
-n &= t \times R x + \cancel{t \times t} \quad (\text{since } t \times t = 0)\\
-n &= t \times R x 
-\end{aligned}
-$$
+<div style="border: 1.5px solid #333; padding: 1em 1.5em; margin: 1em 0; background: #fafafa; font-family: serif; font-size: 0.97em; line-height: 1.6;">
+<p style="margin: 0 0 0.5em 0; font-weight: bold; font-size: 1.05em; border-bottom: 1px solid #333; padding-bottom: 0.3em;">Algorithm 1: RANSAC for Essential Matrix Estimation</p>
 
-Lastly, by definition of $n$, 
+<p style="margin: 0.3em 0;"><b>Input:</b> correspondence pairs $\{(p_1^i, p_2^i)\}_{i=1}^{N}$ from Step 3, camera intrinsics $K$, number of iterations $T$, Sampson distance threshold $\epsilon$</p>
+<p style="margin: 0.3em 0 0.8em 0;"><b>Output:</b> rotation $R$, translation $t$, inlier mask</p>
 
-$$
-\begin{aligned}
-x' \cdot n &= 0 \\
-x' \cdot (t \times (R x)) &= 0 \\
-x'^T [t_{\leftrightarrow}] R x &= 0 \\
-x'^T E x &= 0
-\end{aligned}
-$$
-
-Where $$[t_{\leftrightarrow}]$$ is a [skew-symmetric matrix representing the cross product](https://en.wikipedia.org/wiki/Skew-symmetric_matrix#Cross_product) of $t$ with $R x$ and $$E = [t_{\leftrightarrow}] R$$ is the essential matrix.
-
-Thus, for every $(x, x')$ correspondence pair, we have an epipolar constraint relating the two by a rotation and translation: $x'^T E x = 0$.
-
-We can construct a system of equations for every $(x, x')$ correspondence pair by unrolling E into a vector of variables:
-
-$$x = (u, v, 1)^T, \quad x' = (u', v', 1)$$
-
-$$
-\begin{bmatrix} u' & v' & 1 \end{bmatrix}
-\begin{bmatrix} 
-e_{11} & e_{12} & e_{13} \\ 
-e_{21} & e_{22} & e_{23} \\ 
-e_{31} & e_{32} & e_{33} 
-\end{bmatrix}
-\begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = 0
-\quad \Rightarrow \quad
-\begin{bmatrix} u'u & u'v & u' & v'u & v'v & v' & u & v & 1 \end{bmatrix}
-\begin{bmatrix} 
-e_{11} \\ e_{12} \\ e_{13} \\ e_{21} \\ e_{22} \\ e_{23} \\ e_{31} \\ e_{32} \\ e_{33} 
-\end{bmatrix} = 0
-$$
-
-Each of these is a constraint in the system of equations:
-
-$$A e = 0$$
-
-The rotation $$R$$ has 3 degrees of freedom (pitch, roll, yaw), and the translation $$t$$ has 3 degrees of freedom (x, y, z). Thus, we have 6 degrees of freedom in total. Note, however, that in figure 3 the translation between $$O$$ and $$O'$$ is ambiguous in scale. To see why, suppose we scale $$t$$ by some factor $$\lambda$$. Then the essential matrix becomes:
-
-$$E' = [(\lambda t)_{\leftrightarrow}] R = \lambda [t_{\leftrightarrow}] R = \lambda E$$
-
-Substituting this into the epipolar constraint:
-
-$$
-\begin{aligned}
-x'^T E' x &= x'^T (\lambda E) x \\
-&= \lambda (x'^T E x) \\
-&= \lambda \cdot 0 \\
-&= 0
-\end{aligned}
-$$
-
-Since the constraint is satisfied regardless of $$\lambda$$, we cannot recover the magnitude of $$t$$ from the epipolar constraint alone. We can only recover the direction of $$t$$, reducing our degrees of freedom from 6 to 5.
-
-
-
-### 8-point algorithm
-
-Even though we only have 5 degrees of freedom, and therefore would typically only need 5 correspondences to solve for the essential matrix, [David Nistér 2004](https://www.scribd.com/document/471805325/Nister-5pt-pdf) demonstrates that if you write out these constraints strictly, you end up with a system of equations that reduces to a 10th-degree polynomial that encodes the geometric (rotation and translation) relationship between these 5 degrees of freedom. 
-
-Instead, we can use the 8-point algorithm to solve for the essential matrix without factoring in the geometric constraints, after which we can enforce the geometric constraints to ensure it's a valid essential matrix and recover $$R$$ and $$t$$.
-
-**Why 8 points if $$E$$ has 9 degrees of freedom?** While $$E = [t_{\leftrightarrow}] R$$ has only 5 true degrees of freedom (3 for rotation $$R$$, 2 for the direction of translation $$t$$), we solve for it as a 3×3 matrix with 9 elements. Since we can only recover $$E$$ up to a scale factor, we have 8 unknowns to solve for (9 elements - 1 scale factor = 8). Each correspondence pair $$(x, x')$$ gives us one linear constraint equation, so we need at least 8 correspondences to solve the system $$A \vec{e} = 0$$.
-
-As with HW2, we use RANSAC to estimate the essential matrix by randomly sampling 8 correspondences and solving for the essential matrix expressed as a vector of variables $\vec{e}$:
-$$A \vec{e} = 0$$
-
-**Algorithm: 8-Point Essential Matrix Estimation**
-
-<div style="text-align: center;">
-  <figure style="display: inline-block; margin: 1em 0;">
-    <img src="/hws/hw3/assets/ransac_8_point.png" alt="RANSAC 8-point algorithm" style="max-width: 100%;">
-    <figcaption style="margin-top: 0.5em; font-style: italic;">
-      <strong>Algorithm 1:</strong> RANSAC 8-point algorithm to estimate essential matrix.
-    </figcaption>
-  </figure>
+<p style="margin: 0.2em 0 0.2em 0;">1: &ensp; best_inliers &larr; 0; &ensp; $E^*$ &larr; None</p>
+<p style="margin: 0.2em 0 0.2em 0;">2: &ensp; <b>for</b> iter = 1 <b>to</b> $T$ <b>do</b></p>
+<p style="margin: 0.2em 0 0.2em 2em;">3: &ensp; Randomly sample 8 correspondences &ensp;<span style="color: #888; font-style: italic; font-size: 0.9em;">(from the <a href="https://en.wikipedia.org/wiki/Eight-point_algorithm">8-point algorithm</a>)</span></p>
+<p style="margin: 0.2em 0 0.2em 2em;">4: &ensp; Estimate essential matrix $E$ from the 8 samples</p>
+<p style="margin: 0.2em 0 0.2em 2em;">5: &ensp; Decompose $E$ into 4 candidate $(R, t)$ pairs and run cheirality check on the sample &ensp;<span style="color: #888; font-style: italic; font-size: 0.9em;">(see <a href="#rt-ambiguity">appendix A.2</a>)</span></p>
+<p style="margin: 0.2em 0 0.2em 2em;">6: &ensp; <b>if</b> no valid $(R, t)$ found, <b>continue</b> to next iteration</p>
+<p style="margin: 0.2em 0 0.2em 2em;">7: &ensp; Compute inliers over <i>all</i> correspondences: $\;\mathcal{I} \leftarrow \{i : d_{\text{Sampson}}^2(E,\, p_1^i,\, p_2^i) < \epsilon \}$ &ensp;<span style="color: red; font-weight: bold; font-size: 0.9em;">← implement</span> &ensp;<span style="color: #888; font-style: italic; font-size: 0.9em;">(see <a href="#sampson-distance">appendix A.1</a>)</span></p>
+<p style="margin: 0.2em 0 0.2em 2em;">8: &ensp; <b>if</b> $|\mathcal{I}|$ > best_inliers <b>then</b> &ensp;<span style="color: red; font-weight: bold; font-size: 0.9em;">← implement</span></p>
+<p style="margin: 0.2em 0 0.2em 4em;">9: &ensp; best_inliers &larr; $|\mathcal{I}|$; &ensp; save $E^*$</p>
+<p style="margin: 0.2em 0 0.2em 2em;">10: &ensp; <b>end if</b></p>
+<p style="margin: 0.2em 0 0.2em 0;">11: &ensp; <b>end for</b></p>
+<p style="margin: 0.2em 0 0.2em 0;">12: &ensp; Recompute inliers $\mathcal{I}^*$ from $E^*$ over all correspondences &ensp;<span style="color: red; font-weight: bold; font-size: 0.9em;">← implement</span></p>
+<p style="margin: 0.2em 0 0.2em 0;">13: &ensp; Re-estimate $E$ from $\mathcal{I}^*$ &ensp;<span style="color: red; font-weight: bold; font-size: 0.9em;">← implement</span></p>
+<p style="margin: 0.2em 0 0.2em 0;">14: &ensp; Recover $R, t$ from refined $E$ via decomposition + cheirality</p>
+<p style="margin: 0.2em 0 0 0;">15: &ensp; <b>return</b> $R, t$, inlier mask</p>
 </div>
 
-Let's walk through each major step of this algorithm:
+<span style="color: red;">**[Deliverables]**</span>
+- Complete the `ransac.py` implementation.
+- Report RANSAC parameters used: number of iterations $T$, Sampson distance threshold $\epsilon$, and the final number of inliers found.
+- Visualize the RANSAC convergence (best inlier count over iterations).
+- Visualize the matched correspondences after RANSAC (inliers only).
+
+<div style="text-align: center; margin: 1em 0;">
+  <img src="/hws/hw3/assets/step4_ransac_convergence.png" alt="RANSAC convergence plot" style="max-width: 70%; height: auto;">
+  <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;">RANSAC convergence: best inlier count over iterations</p>
+</div>
+
+<div style="text-align: center; margin: 1em 0;">
+  <img src="/hws/hw3/assets/step4_correspondences_after_ransac.png" alt="Matches after RANSAC" style="max-width: 80%; height: auto;">
+  <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;">Feature correspondences after RANSAC (inliers only)</p>
+</div>
+
+</details>
+
+<details open class="section" markdown="1">
+<summary>Step 5: Triangulating Inliers to generate Point Cloud (0 points, done for you)</summary>
+
+Now that we have the camera poses ($R$ and $t$ from Step 4) and the inlier correspondences, we can recover the 3D positions of the matched points via [triangulation](https://en.wikipedia.org/wiki/Triangulation_(computer_vision)). This part is already done for you, but you will need to load the outputs into [Viser](https://viser.studio/) and show screenshots of the sparse point cloud. If the previous steps are implemented properly and `main.py` executes, a viser command will be outputted at the very end of the script. 
+
+If you'd like to learn more about the underlying math, see [the appendix](#triangulation-dlt).
 
-### Step 1: Point Normalization (Line 3)
+
+<span style="color: darkgreen;">**[Hints]**</span>
 
-Before we begin estimating the essential matrix, we normalize the image coordinates. This step is crucial for numerical stability.
+When debugging, compare your point cloud with the input images and ask yourself:
+- Are your inliers after RANSAC good enough? Do they actually correspond to the same feature across the images?
+- Do the different surfaces at different depths seem right?
+- Do planar surfaces in the image look planar in the point cloud?
+- Do the cameras look right? Is camera 2 rotated and translated in a way consistent with the real scene?
 
-The normalization transforms 2D image coordinates $$x_i$$ into normalized camera coordinates $$\hat{x}_i$$ by applying the inverse camera matrix $$K^{-1}$$:
+Additionally:
+- `step5_pipeline_grid.png` that's produced by the pipeline gives you a comprehensive overview of our SfM system, including the epipolar lines associated with our estimated $E$ matrix. Ask: do the epipolar lines look correct?
+- You shouldn't need to touch the triangulation-related parameters in the config, but they are accessible in case you'd like to adjust them
+- Triangulation will cause you to lose some points from your initial set of RANSAC inliers. This is expected. For reference: staff solution lost ~10 points after performing triangulation.
 
-$$\hat{x}_i \leftarrow K^{-1}[x_i; 1]$$
+<span style="color: red;">**[Deliverables]**</span>
 
-This converts from pixel coordinates to normalized image coordinates where the camera's intrinsic parameters (focal length, principal point, etc.) are factored out. The essential matrix $$E$$ relates normalized coordinates, whereas the fundamental matrix $$F$$ (which we don't use here) relates pixel coordinates directly.
+3 screenshots of the Viser server showing the point cloud from different angles:
+- All 3 of them should show the cameras so we can observe the rotation + translation that relates them and have a reference across the 3 images.
+- All 3 of them should **have a caption/description of what the identifiable 'landmarks' from the original images are visible**, since your point cloud will likely be sparse and hard to understand at first glance.
+  - A point cloud of even, e.g., 20 points is valid, so long as you can justify why it's consistent with the geometry of the real-world scene.
 
-**Why normalize?** Without normalization, the elements of the constraint matrix $$A$$ (which we'll build next) can vary by several orders of magnitude, leading to poor numerical conditioning when solving via SVD. Normalized coordinates typically have values in the range $$[-1, 1]$$, making the system well-conditioned.
+  
 
-### Step 2: Constructing the Constraint Matrix (Lines 7-8)
+<div style="display: flex; justify-content: center; gap: 1em; margin: 1em 0;">
+  <div style="flex: 1; text-align: center; min-width: 200px; display: flex; flex-direction: column;">
+    <div style="height: 280px; display: flex; align-items: center; justify-content: center;">
+      <img src="/hws/hw3/assets/pc1.png" alt="Point cloud angle 1" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
+    <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;">... I see bookshelf, poster, coffee table ...</p>
+  </div>
+  <div style="flex: 1; text-align: center; min-width: 200px; display: flex; flex-direction: column;">
+    <div style="height: 280px; display: flex; align-items: center; justify-content: center;">
+      <img src="/hws/hw3/assets/pc2.png" alt="Point cloud angle 2" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
+    <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;"> ... the right camera looks correctly positioned to the top right of camera 1, with correct rotation applied ...</p>
+  </div>
+  <div style="flex: 1; text-align: center; min-width: 200px; display: flex; flex-direction: column;">
+    <div style="height: 280px; display: flex; align-items: center; justify-content: center;">
+      <img src="/hws/hw3/assets/pc3.png" alt="Point cloud angle 3" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
+    <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;"> ... the poster looks planar from this angle, as expected ...</p>
+  </div>
+</div>
 
-Within each RANSAC iteration, we randomly sample 8 correspondence pairs. For each pair $$(\hat{x}_i, \hat{x}'_i)$$, we construct a row of the constraint matrix $$A$$ based on the epipolar constraint:
+</details>
 
-$$\hat{x}'^T_i E \hat{x}_i = 0$$
+<details class="section" markdown="1">
+<summary>Assignment Deliverables</summary>
 
-Writing $$\hat{x}_i = (u_i, v_i, 1)^T$$ and $$\hat{x}'_i = (u'_i, v'_i, 1)^T$$, we can expand this as we showed earlier. The vectorized form gives us:
+As with HW1 and HW2, you must submit both your code and a webpage written as an `index.html` with pointers to images/assets. You must also submit a `README.md` file that outlines how to run your code. Lastly, submit a PDF version of your webpage. **Failure to submit any of these will result in lost points**. 
 
-$$\text{vec}(\hat{x}' \hat{x}^T)^T = \begin{bmatrix} u'u & u'v & u' & v'u & v'v & v' & u & v & 1 \end{bmatrix}$$
+For the staff-provided images, report the following:
+  - Your random seed chosen
+  - Camera intrinsics matrix $K$ used in the pipeline
+  - SIFT number of points detected
+  - Feature matching nearest neighbor distance ratio (NNDR) threshold used
+  - RANSAC parameters:
+      - number of RANSAC iterations
+      - $\epsilon$ parameter used
+  - Any other staff-provided parameters that you modified.
+- Visualizations of:
+  - SIFT features
+  - NNDR histogram, with threshold overlaid
+  - Top 5 features matched, ranked by NNDR
+  - Correspondences between image 1 and 2 *before* RANSAC
+  - Correspondences between image 1 and 2 *after* RANSAC
+  - RANSAC convergence.
+  - At least 3 screenshots of sparse point cloud with 'landmarks' described.
 
-This becomes one row in our constraint matrix $$A \in \mathbb{R}^{8 \times 9}$$. With 8 correspondence pairs, we get 8 equations (rows).
+</details>
 
-### Step 3: Solving via SVD (Line 9)
+<details class="section" markdown="1">
+<summary>Extra Credit</summary>
 
-We need to solve the homogeneous linear system:
+<details markdown="1">
+<summary id="capturing-your-own-scene" style="font-size: large; font-variant: small-caps; font-weight: bold; cursor: pointer;">Capture your own scene (10 points, competition)</summary>
 
-$$A\vec{e} = 0$$
+You are required to use the staff-provided images (provided in the [overview](#overview)) for full credit on this assignment. 
 
-where $$\vec{e}$$ is the 9-element vector containing the entries of $$E$$ (flattened column-wise or row-wise).
+For extra credit, reconstruct your own scene with our simple SfM pipeline on 2 images of your own. You get 10 points if you can get a decent reconstruction, and we will also be voting on the best custom scenes! **For this section, stick to the current pipeline. You are allowed to modify: scene contents, image resolution, and config hyperparameters.**
 
-**Why SVD?** For a homogeneous system $$A\vec{e} = 0$$, the solution lies in the null space of $$A$$. The Singular Value Decomposition gives us:
+You'll need to provide the parameters for your own camera used. If this is difficult to access online, you can try accessing the image metadata and recover the parameters.
 
-$$A = U \Sigma V^T$$
+Advice:
+- Lock the exposure and focus of your camera before taking photos. This will make it easier to find common features across the scene images.
+- Choose a scene with multiple levels of depth (2+). Failing to do so will cause the model to only pick planar correspondences, which don't exhibit much disparity/parallax across camera angles. This makes it significantly harder to determine the geometry that relates these two photos (since we don't exhibit much change between them). Thus, we want a scene with varying levels of depth so that we see parallax at varying distances.
+    - this also means that we don't only want to rotate our camera but translate as well. You will need to find a sweet spot between how much or how little translation to use. In a realistic pipeline you'd have ≫ 2 images taken and wouldn't have to worry about this as much.
+- Choose a scene with lots of textured objects. The SIFT feature descriptor used is targeting textures and your pipeline's performance will markedly increase with the number of textured objects (ideally with textures at different distances in the scene).
 
-where the columns of $$V$$ corresponding to zero (or near-zero) singular values span the null space of $$A$$. Since we have 8 equations and 9 unknowns, the system is underdetermined by 1, meaning the null space is 1-dimensional. The solution $$\vec{e}$$ is the last column of $$V$$ (corresponding to the smallest singular value).
+**More details on competition to come**.
 
-Once we have $$\vec{e}$$, we reshape it back into a $$3 \times 3$$ matrix to get $$E_{raw}$$.
+</details>
 
-### Step 4: Enforcing the Essential Matrix Constraint (Lines 10-12)
 
-The matrix $$E_{raw}$$ we just computed might not satisfy the properties of a true essential matrix. Recall that $$E = [t_{\leftrightarrow}] R$$, where $$[t_{\leftrightarrow}]$$ is rank-2 and $$R$$ is a rotation matrix. This structure imposes two critical constraints on $$E$$:
+<details markdown="1">
+<summary style="font-size: large; font-variant: small-caps; font-weight: bold; cursor: pointer;">Improve the staff solution (10 points, competition) </summary>
 
-1. **Rank 2**: $$E$$ must have rank 2 (one zero singular value)
-2. **Two equal singular values**: The two non-zero singular values must be equal
+Improve on the staff-provided scene by adjusting the pipeline hyperparameters. You will likely need to use the higher resolution image as well. You'll be awarded 10 points if you can get a noticeable improvement, and even more goodies if ranked high in the competition!
 
-To enforce these constraints, we "project" $$E_{raw}$$ onto the space of valid essential matrices:
+**More details on competition to come**.
 
-$$E_{raw} = U_E \Sigma V_E^T = U_E \text{diag}(\sigma_1, \sigma_2, \sigma_3) V_E^T$$
+</details>
 
-We then construct the corrected essential matrix by:
+</details>
 
-$$E = U_E \text{diag}(1, 1, 0) V_E^T$$
 
-This forces the two largest singular values to be equal (set to 1) and the smallest to be exactly zero, ensuring $$E$$ is rank-2 and has the proper structure.
+---
 
-**Why does this work?** This is the closest rank-2 matrix to $$E_{raw}$$ in the Frobenius norm sense, and setting the two non-zero singular values to be equal enforces the constraint that comes from $$E = [t_{\leftrightarrow}] R$$.
+## Appendix
 
-### Step 5: Computing Inliers (Line 13)
+<details markdown="1">
+<summary style="font-size: large; font-variant: small-caps; font-weight: bold; cursor: pointer;">A. RANSAC and the Essential Matrix</summary>
 
-Now we evaluate how well our estimated $$E$$ fits all $$N$$ correspondence pairs (not just the 8 we sampled). For each normalized correspondence pair $$(\hat{x}_i, \hat{x}'_i)$$, we compute the **epipolar distance**:
+<h4 id="sampson-distance">A.1 Sampson Distance</h4>
 
-$$d_i = (\hat{x}'_i)^T E \hat{x}_i$$
+For a pair of K-normalized corresponding points $p_1$ and $p_2$, a perfect match satisfies the **epipolar constraint**:
 
-Ideally, if $$(\hat{x}_i, \hat{x}'_i)$$ are true correspondences of the same 3D point and $$E$$ is correct, this distance should be zero. In practice, due to noise and measurement errors, we accept points as inliers if:
+$$p_2^\intercal E \, p_1 = 0$$
 
-$$|d_i| = |(\hat{x}'_i)^T E \hat{x}_i| < \tau$$
+In practice, this is never exactly zero due to noise in feature detection and matching. The **Sampson distance** provides a first-order geometric approximation of how far a correspondence is from satisfying this constraint:
 
-where $$\tau$$ is a threshold (a hyperparameter you tune based on expected noise levels).
+$$d_{\text{Sampson}}^2 = \frac{(p_2^\intercal E \, p_1)^2}{(Ep_1)_1^2 + (Ep_1)_2^2 + (E^\intercal p_2)_1^2 + (E^\intercal p_2)_2^2}$$
 
-The set of inliers:
+where $(Ep_1)_i$ denotes the $i$-th component of the vector $Ep_1$.
 
-$$S_{curr} = \{i \mid |(\hat{x}'_i)^T E \hat{x}_i| < \tau\}$$
+- **Numerator**: the squared algebraic error—how much the pair violates the epipolar constraint.
+- **Denominator**: the sum of squared components of the epipolar lines in both images, which acts as a normalization factor converting the algebraic error into an approximate geometric distance (in squared pixels when working in pixel coordinates).
 
-represents the correspondences that are consistent with this hypothesis for $$E$$.
+Within RANSAC, a correspondence is counted as an **inlier** if $d_{\text{Sampson}}^2 < \epsilon$ for a chosen threshold $\epsilon$.
 
-### Step 6: Recovering Camera Pose (Lines 19-20)
+The Sampson distance is preferred over the simpler algebraic error $(p_2^\intercal E \, p_1)$ because it provides a meaningful geometric interpretation and is invariant to the scale of $E$. It is also much cheaper to compute than the true geometric reprojection error (which requires finding the closest point on the epipolar line for each observation), while providing a good approximation.
 
-After RANSAC completes, we have the best essential matrix $$E_{best}$$. Now we need to extract the rotation $$R$$ and translation $$t$$ from it.
+<h4 id="rt-ambiguity">A.2 The R, t Ambiguity</h4>
 
-**The Ambiguity Problem**: Given an essential matrix $$E$$, there are **four possible** solutions for $$(R, t)$$:
+<p>The essential matrix encodes the relative pose as $E = [t]_\times R$, where $[t]_\times$ is the <a href="https://en.wikipedia.org/wiki/Skew-symmetric_matrix">skew-symmetric matrix</a> form of the cross product with $t$. When we decompose $E$ via SVD ($E = U \Sigma V^\intercal$), two distinct ambiguities arise:</p>
 
-$$
-\begin{aligned}
-&(R_1, t), \quad (R_1, -t)\\
-&(R_2, t), \quad (R_2, -t)
-\end{aligned}
-$$
+<ol>
+<li><b>Sign of $t$</b>: Since $E$ and $-E$ encode the same epipolar constraint ($p_2^\intercal E \, p_1 = 0$ iff $p_2^\intercal (-E) p_1 = 0$), the decomposition cannot distinguish $t$ from $-t$. The translation candidates are $t = U_{:,3}$ and $t = -U_{:,3}$ (the third column of $U$).</li>
 
-where $$R_1$$ and $$R_2$$ are two different rotation matrices and $$t$$ can point in either direction.
+<li><b>Rotation ambiguity</b>: The SVD-based decomposition involves a $90°$ rotation matrix:</li>
+</ol>
 
-These four solutions can be extracted from the SVD of $$E$$. The decomposition procedure (which we won't derive here but can be found in Hartley & Zisserman's "Multiple View Geometry") gives us these four candidates.
+$$W = \begin{bmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
 
-**Cheirality Check**: Only one of these four solutions is physically valid. The **cheirality constraint** requires that the reconstructed 3D points lie **in front of both cameras** (positive depth). For each of the four solutions:
+<p>Using either $W$ or $W^\intercal$ gives two valid rotation candidates: $R = UWV^\intercal$ or $R = UW^\intercal V^\intercal$.</p>
 
-1. Triangulate the 3D positions of points in $$S_{best}$$ using the candidate $$(R, t)$$
-2. Check if the reconstructed 3D points have positive depth in both camera coordinate systems
-3. The solution where the most points (ideally all inliers) have positive depth in both cameras is the correct one
+<p>These $2 \times 2 = 4$ combinations of $(R, t)$ all satisfy the epipolar constraint equally well, but only <b>one</b> is geometrically valid—the one where triangulated 3D points lie in front of both cameras.</p>
 
-This eliminates the ambiguity and gives us the final $$(R, t)$$.
+<p><b>Cheirality check.</b> To select the correct solution, we triangulate a set of points using each candidate $(R, t)$ and count how many have <b>positive depth</b> in both camera coordinate frames. The candidate with the most such points is the correct physical configuration. A point $X$ has positive depth in camera 1 if $X_z > 0$, and positive depth in camera 2 if $(RX + t)_z > 0$.</p>
 
-**Note on scale ambiguity**: As discussed earlier, we can only recover $$t$$ up to a scale factor. The translation vector we recover will have unit norm $$\|t\| = 1$$, representing only the direction of translation. The actual scale must be determined through additional information (e.g., known object sizes or camera baselines).
+</details>
 
+<details markdown="1">
+<summary style="font-size: large; font-variant: small-caps; font-weight: bold; cursor: pointer;">B. Triangulation</summary>
 
-# Step 4: Triangulation to recover 3D structure
+<h4 id="triangulation-dlt">B.1 Direct Linear Transform (DLT)</h4>
 
-Now that we have recovered the camera poses (rotation $$R$$ and translation $$t$$ between cameras), we can use the 2D correspondences to reconstruct the 3D positions of the points in the scene. This process is called **triangulation**.
+Given two camera projection matrices $P_1 = K[I \mid 0]$ and $P_2 = K[R \mid t]$, we triangulate each inlier correspondence to find the 3D point that projects onto both observations. We then filter the resulting points by cheirality (positive depth in both cameras), depth bounds, and reprojection error. 
 
-## The Triangulation Problem
+Given a pair of corresponding 2D observations $\hat{x} = (u, v, 1)^\intercal$ and $\hat{x}' = (u', v', 1)^\intercal$ and two camera projection matrices $P_1$ and $P_2$, we want to find the 3D point $X$ (in homogeneous coordinates) that projects to both.
 
-Given:
-- Two camera poses: Camera 1 at the origin with identity rotation, and Camera 2 with rotation $$R$$ and translation $$t$$
-- A correspondence pair $$(\hat{x}, \hat{x}')$$ in normalized image coordinates
-- Camera projection matrices $$P_1$$ and $$P_2$$
+The projection relationship $\hat{x} \sim PX$ means these vectors are parallel, so their cross product vanishes:
 
-We want to find the 3D point $$X$$ that projects to $$\hat{x}$$ in camera 1 and $$\hat{x}'$$ in camera 2.
+$$\hat{x} \times (PX) = 0$$
 
-Without loss of generality, we can set the first camera's pose as the world coordinate frame:
-$$P_1 = K[I | 0] = [I | 0] \text{ (since we work in normalized coordinates)}$$
+Expanding using the rows $p^{1\intercal}, p^{2\intercal}, p^{3\intercal}$ of $P$ and selecting the two independent equations:
 
-The second camera's projection matrix incorporates the rotation and translation:
-$$P_2 = [R | t]$$
+$$u(p^{3\intercal} X) - (p^{1\intercal} X) = 0, \qquad v(p^{3\intercal} X) - (p^{2\intercal} X) = 0$$
 
-## The Constraint
+Each camera contributes 2 equations. With 2 cameras we obtain a $4 \times 4$ homogeneous system $AX = 0$, which we solve via SVD: $X$ is the last column of $V$ from $A = U\Sigma V^\intercal$ (the singular vector corresponding to the smallest singular value). The resulting homogeneous 4-vector is converted to 3D Euclidean coordinates by dividing by its last component.
 
-For a 3D point $$X = (X, Y, Z, 1)^T$$ in homogeneous coordinates, its projection onto camera $$i$$ should satisfy:
-$$\hat{x}_i \sim P_i X$$
+**Filtering.** After triangulation, points are filtered by:
+1. **Cheirality**: positive depth in both cameras
+2. **Depth bounds**: discard unreasonably near or far points
+3. **Reprojection error**: project each 3D point back into both images and measure pixel distance to the original observations—large errors indicate noisy or degenerate triangulations
 
-where $$\sim$$ denotes equality up to scale (since we're in homogeneous coordinates). This means that $$\hat{x}_i$$ and $$P_i X$$ should be parallel, or equivalently, their cross product should be zero:
-$$\hat{x}_i \times (P_i X) = 0$$
+</details>
 
-## Linear Triangulation via DLT
 
-The cross product constraint gives us a system of linear equations. For each camera, writing $$\hat{x} = (u, v, 1)^T$$ and $$P_i = [p_i^1; p_i^2; p_i^3]$$ (where $$p_i^j$$ is the $$j$$-th row of $$P_i$$), the cross product expands to:
+### Acknowledgements
 
-$$
-\begin{bmatrix} 
-u \\ v \\ 1 
-\end{bmatrix} 
-\times 
-\begin{bmatrix} 
-p_1^T X \\ p_2^T X \\ p_3^T X 
-\end{bmatrix} 
-= 
-\begin{bmatrix} 
-v(p_3^T X) - (p_2^T X) \\ 
-(p_1^T X) - u(p_3^T X) \\ 
-u(p_2^T X) - v(p_1^T X) 
-\end{bmatrix}
-= 0
-$$
+This assignment was created by Ryan Tabrizi with helpful feedback from Jordan Lin and Aleksander Holynski.
 
-This gives us three equations, but only two are linearly independent (the third is a linear combination of the first two). Rearranging:
-
-$$
-\begin{aligned}
-u(p_3^T X) - (p_1^T X) &= 0 \quad \Rightarrow \quad (u p_3^T - p_1^T) X = 0\\
-v(p_3^T X) - (p_2^T X) &= 0 \quad \Rightarrow \quad (v p_3^T - p_2^T) X = 0
-\end{aligned}
-$$
-
-Each camera gives us 2 equations. With 2 cameras, we get 4 equations for the 3D point $$X$$ (which has 4 components in homogeneous coordinates, but only 3 degrees of freedom due to scale). Stacking these equations:
-
-$$
-A X = 
-\begin{bmatrix}
-u_1 p_{1,3}^T - p_{1,1}^T \\
-v_1 p_{1,3}^T - p_{1,2}^T \\
-u_2 p_{2,3}^T - p_{2,1}^T \\
-v_2 p_{2,3}^T - p_{2,2}^T
-\end{bmatrix}
-X = 0
-$$
-
-where subscripts 1 and 2 denote camera 1 and camera 2, respectively.
-
-**Solving via SVD**: Just as we did for the essential matrix, we solve this homogeneous system $$AX = 0$$ using SVD. The solution is the last column of $$V$$ (corresponding to the smallest singular value) from the decomposition $$A = U\Sigma V^T$$.
-
-The resulting 4D homogeneous point must be converted to 3D Euclidean coordinates by dividing by the last component:
-$$X_{euclidean} = \begin{bmatrix} X/W \\ Y/W \\ Z/W \end{bmatrix}$$
-where $$X = (X, Y, Z, W)^T$$ in homogeneous coordinates.
-
-## Triangulation for All Inliers
-
-We triangulate all correspondences in $$S_{best}$$ (the inlier set from RANSAC) to reconstruct the 3D structure of the scene. Each correspondence gives us one 3D point.
-
-**Quality Check**: After triangulation, it's good practice to:
-1. Verify that triangulated points have positive depth in both cameras (this should be satisfied if the cheirality check was done correctly)
-2. Check the reprojection error: project the 3D point back onto both images and measure the distance to the original 2D points
-3. Discard points with large reprojection errors, as they likely correspond to outliers or poorly conditioned triangulation
-
-**Why can triangulation fail?** Even with correct correspondences, triangulation can be poorly conditioned when:
-- The two camera centers are too close (small baseline)
-- The viewing directions are nearly parallel
-- The point is very far from both cameras
-
-These scenarios lead to large uncertainty in the depth estimate. A good rule of thumb is that the angle between the two viewing rays should be at least 2-5 degrees for reliable triangulation.
-
-
-# Step 5: Refinement with bundle adjustment
-
-At this point, we have estimates for:
-- The camera poses: $$R$$ and $$t$$ (from Step 3)
-- The 3D structure: positions of all inlier points $$\{X_j\}$$ (from Step 4)
-
-However, these estimates are not optimal. Why?
-
-1. **RANSAC gives a good but not optimal solution**: RANSAC finds a robust estimate by maximizing inliers, but it doesn't minimize reprojection error
-2. **Errors accumulate**: Small errors in pose estimation affect triangulation, and vice versa
-3. **We solved components separately**: The pose and structure were estimated in separate steps, not jointly
-
-**Bundle adjustment** is a joint optimization that refines both camera poses and 3D structure simultaneously by minimizing the reprojection error across all observations.
-
-## The Bundle Adjustment Problem
-
-Given:
-- Initial camera poses (rotations and translations)
-- Initial 3D point positions
-- 2D observations (correspondences) of 3D points in multiple images
-
-We want to minimize the **reprojection error** - the sum of squared distances between observed 2D points and the projections of the estimated 3D points:
-
-$$
-\min_{R, t, \{X_j\}} \sum_{i,j} \left\| x_{ij} - \pi(P_i X_j) \right\|^2
-$$
-
-where:
-- $$i$$ indexes cameras (views)
-- $$j$$ indexes 3D points
-- $$x_{ij}$$ is the observed 2D position of point $$j$$ in camera $$i$$
-- $$P_i$$ is the projection matrix for camera $$i$$ (function of $$R_i, t_i$$)
-- $$\pi()$$ is the projection function that maps 3D points to 2D
-- $$X_j$$ is the 3D position of point $$j$$
-
-The term "bundle adjustment" comes from the idea of adjusting the "bundle" of light rays (projections) from each 3D point to each camera so they all meet consistently at the 3D point positions.
-
-## Why is this a non-linear optimization?
-
-The projection function $$\pi(P_i X_j)$$ involves:
-1. **Rotation**: Rotating 3D points is non-linear (rotation matrices involve trigonometric functions)
-2. **Division by depth**: Converting from 3D to 2D via $$\pi([X,Y,Z]^T) = [X/Z, Y/Z]^T$$ introduces non-linearity
-
-Therefore, we cannot solve this with simple linear least squares. Instead, we use **non-linear least squares optimization**, typically with the **Levenberg-Marquardt algorithm** (a combination of gradient descent and Gauss-Newton method).
-
-## The Structure of Bundle Adjustment
-
-Bundle adjustment optimizes many parameters simultaneously:
-- Camera parameters: For $$n$$ cameras, we have rotation (3 DOF per camera) and translation (3 DOF per camera) = $$6n$$ parameters
-- 3D point positions: For $$m$$ 3D points, we have $$3m$$ parameters
-
-Total: $$6n + 3m$$ parameters to optimize!
-
-For a typical SfM problem with, say, 100 images and 10,000 points, that's 30,600 parameters.
-
-**How is this tractable?** The key insight is that the problem has **sparse structure**:
-- Each 3D point is only observed in a subset of cameras
-- The reprojection error for point $$j$$ in camera $$i$$ only depends on $$X_j$$, $$R_i$$, and $$t_i$$
-
-This means the Jacobian matrix (matrix of partial derivatives) is extremely sparse, which can be exploited by specialized sparse optimization algorithms. Libraries like `scipy.optimize.least_squares` with the `method='lm'` option or specialized SfM libraries leverage this sparsity.
-
-## Implementing Bundle Adjustment
-
-In practice, you would:
-
-1. **Parameterize the problem**: 
-   - Represent rotations using a minimal 3-parameter representation (e.g., axis-angle or Euler angles)
-   - Pack all parameters into a single vector: $$\theta = [r_1, t_1, r_2, t_2, ..., X_1, X_2, ...]$$
-
-2. **Define the residual function**:
-   ```python
-   def residuals(params, observations, n_cameras, n_points):
-       """
-       params: packed vector of camera and point parameters
-       observations: list of (camera_idx, point_idx, observed_2d_point)
-       returns: vector of residuals (difference between observed and projected)
-       """
-       camera_params = params[:n_cameras * 6]  # 6 per camera
-       points_3d = params[n_cameras * 6:].reshape(-1, 3)  # rest are 3D points
-       
-       residuals = []
-       for cam_idx, point_idx, observed in observations:
-           R, t = extract_camera_params(camera_params, cam_idx)
-           X = points_3d[point_idx]
-           projected = project(R, t, X)
-           residuals.append(observed - projected)
-       return np.concatenate(residuals)
-   ```
-
-3. **Run the optimizer**:
-   ```python
-   from scipy.optimize import least_squares
-   
-   result = least_squares(
-       residuals, 
-       initial_params,
-       method='lm',  # Levenberg-Marquardt
-       args=(observations, n_cameras, n_points)
-   )
-   optimized_params = result.x
-   ```
-
-## Practical Considerations
-
-**Convergence**: Bundle adjustment is an iterative algorithm. It typically converges in 10-50 iterations if initialized well (which is why we do RANSAC + triangulation first).
-
-**Local minima**: Like all non-linear optimization, bundle adjustment can get stuck in local minima. Good initialization (from RANSAC and triangulation) is critical.
-
-**Outliers**: Bundle adjustment assumes all observations are correct. A single bad correspondence can significantly corrupt the solution. It's important to:
-- Run bundle adjustment only on verified inliers from RANSAC
-- Optionally use robust cost functions (e.g., Huber loss) that downweight large errors
-
-**Degeneracies**: Certain camera configurations (e.g., all cameras looking in the same direction) can make the problem ill-conditioned. In practice, having diverse viewpoints improves stability.
-
-## The Impact of Bundle Adjustment
-
-Bundle adjustment typically reduces reprojection error by 50-90% compared to the initial RANSAC + triangulation solution. This refinement is essential for:
-- High-quality 3D reconstructions
-- Accurate camera pose estimation for AR/VR applications  
-- Multi-view stereo and dense reconstruction pipelines
-
-Think of bundle adjustment as the "polish" step that takes a good initial estimate and makes it great by ensuring global consistency across all cameras and points.
+<!-- [Previous version of HW3](/hw3_old/) -->
