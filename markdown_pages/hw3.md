@@ -475,8 +475,8 @@ Each camera contributes 2 equations. With 2 cameras we obtain a $4 \times 4$ hom
 </details>
 
 
-<!-- ### Acknowledgements
+### Acknowledgements
 
-This assignment was created by Ryan Tabrizi with helpful feedback from Jordan Lin and Aleksander Holynski. -->
+This assignment was created by Ryan Tabrizi with helpful feedback from Jordan Lin and Aleksander Holynski.
 
 <!-- [Previous version of HW3](/hw3_old/) -->
