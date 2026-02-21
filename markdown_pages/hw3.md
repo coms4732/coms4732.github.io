@@ -3,7 +3,7 @@ title: Homework 3
 layout: default
 permalink: /hw3/
 toc: true
-nav_exclude: true
+nav_order: 4
 published: true
 ---
 
@@ -148,12 +148,12 @@ processEscapes: true
 <summary id="overview">Overview</summary>
 In this assignment, you'll build components of a simple [Structure from Motion (SfM)](https://en.wikipedia.org/wiki/Structure_from_motion) pipeline that estimates correspondences, camera position/motion, and 3D scene points from a pair of images. By the end of this assignment, you'll be able to generate a sparse point cloud and visualize the rotation and translation that relates the 2 cameras. 
 
-For full credit, you only have to achieve a working solution on the staff-provided images ([img1_1280x960.jpeg](/hws/hw3/assets/img1_1280x960.jpeg), [img2_1280x960.jpeg](/hws/hw3/assets/img2_1280x960.jpeg)). If you wish to improve the pipeline on your own and potentially achieve a denser point cloud, you may want to utilize the original-resolution images ([img1_5712x4284.jpeg](/hws/hw3/assets/img1_5712x4284.jpeg), [img2_5712x4284.jpeg](/hws/hw3/assets/img2_5712x4284.jpeg)).
+You will use the staff-provided images ([img1_1280x960.jpeg](/hws/hw3/assets/img1_1280x960.jpeg), [img2_1280x960.jpeg](/hws/hw3/assets/img2_1280x960.jpeg)).
 
 <div style="text-align: center; margin: 1em 0;">
   <div style="display: flex; justify-content: center; gap: 1em; align-items: center; flex-wrap: wrap;">
-    <img src="/hws/hw3/assets/img1_5712x4284.jpeg" alt="Image 1" style="max-width: 48%; height: auto;">
-    <img src="/hws/hw3/assets/img2_5712x4284.jpeg" alt="Image 2" style="max-width: 48%; height: auto;">
+    <img src="/hws/hw3/assets/img1_1280x960.jpeg" alt="Image 1" style="max-width: 48%; height: auto;">
+    <img src="/hws/hw3/assets/img2_1280x960.jpeg" alt="Image 2" style="max-width: 48%; height: auto;">
   </div>
   <p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em;">Ryan's living room out of equilibrium</p>
 </div>
@@ -189,13 +189,12 @@ From inspecting the image directly, we also have access to the image height $h_\
 <span style="color: red;">**[Deliverable]**</span>
 - Implement `intrinsics.py`
 - Report what the $K$ matrix is for the staff-provided images. 
-  - Make sure to indicate which image resolution you're using.
   - For chance of partial credit, show your work.
 
 </details>
 
 <details open class="section" markdown="1">
-<summary>Step 2: Detecting Features (10 points)</summary>
+<summary>Step 2: Detecting Features (15 points)</summary>
 
 In HW2 we used a Harris Corner detector to compute candidate features that we'd want to use as correspondences between the two images. Because the motion between the two images in this assignment is more extreme (rotation + translation), we need a more robust feature descriptor. As such, we use [SIFT features](https://en.wikipedia.org/wiki/Scale-invariant_feature_transform).
 
@@ -242,11 +241,13 @@ In this HW, the OpenCV SIFT API `cv2.SIFT_create` directly returns keypoints and
 </details>
 
 <details open class="section" markdown="1">
-<summary>Step 4: RANSAC to estimate R and t (30 points)</summary>
+<summary>Step 4: RANSAC to estimate R and t (45 points)</summary>
 
 Now we must estimate the rotation matrix $R$ and translation vector $t$ that relate camera 2 (from image 2) to camera 1 (from image 1). We treat camera 1's center as the origin. We do this via [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus) and [epipolar geometry](https://en.wikipedia.org/wiki/Epipolar_geometry). You are not expected to understand the epipolar geometry well, but **you are expected to understand how RANSAC can be used as a general method to estimate the parameters of some mathematical model for which we have data that contains inliers and outliers.** As such, you will be implementing parts of RANSAC in this HW.
 
 The mathematical model we hope to estimate is the rotation and translation that relates these two images. Using epipolar geometry, there is an [essential matrix](https://en.wikipedia.org/wiki/Essential_matrix) $E$ that relates the features between the images. We can use RANSAC to estimate $E$ and decompose it into $R$ and $t$ that relate the cameras. <!-- If you'd like to learn more about the underlying math, see the [appendix](#rt-ambiguity). -->
+
+**Note**: you'll notice in our algorithm that we sample *eight* points, not five. Even though there are only 5 unknown variables (and therefore only 5 correspondences are needed to learn $E$), the [five-point algorithm](https://www-users.cse.umn.edu/~hspark/CSci5980/nister.pdf) requires solving a tenth-degree polynomial and the solution's implementation can be tricky to follow. Instead, we provide an implementation for the [eight-point algorithm](https://en.wikipedia.org/wiki/Eight-point_algorithm) which fits $E$ on eight points with a linear system of equations. This is all abstracted away from you but you're welcome to dig into the implementation if curious.
 
 <div style="border: 1.5px solid #333; padding: 1em 1.5em; margin: 1em 0; background: #fafafa; font-family: serif; font-size: 0.97em; line-height: 1.6;">
 <p style="margin: 0 0 0.5em 0; font-weight: bold; font-size: 1.05em; border-bottom: 1px solid #333; padding-bottom: 0.3em;">Algorithm 1: RANSAC for Essential Matrix Estimation</p>
@@ -256,7 +257,7 @@ The mathematical model we hope to estimate is the rotation and translation that 
 
 <p style="margin: 0.2em 0 0.2em 0;">1: &ensp; best_inliers &larr; 0; &ensp; $E^*$ &larr; None</p>
 <p style="margin: 0.2em 0 0.2em 0;">2: &ensp; <b>for</b> iter = 1 <b>to</b> $T$ <b>do</b></p>
-<p style="margin: 0.2em 0 0.2em 2em;">3: &ensp; Randomly sample 8 correspondences &ensp;<span style="color: #888; font-style: italic; font-size: 0.9em;">(from the <a href="https://en.wikipedia.org/wiki/Eight-point_algorithm">8-point algorithm</a>)</span></p>
+<p style="margin: 0.2em 0 0.2em 2em;">3: &ensp; Randomly sample 8 correspondences</p>
 <p style="margin: 0.2em 0 0.2em 2em;">4: &ensp; Estimate essential matrix $E$ from the 8 samples</p>
 <p style="margin: 0.2em 0 0.2em 2em;">5: &ensp; Decompose $E$ into 4 candidate $(R, t)$ pairs and run cheirality check on the sample <!-- &ensp;<span style="color: #888; font-style: italic; font-size: 0.9em;">(see <a href="#rt-ambiguity">appendix A.2</a>)</span> --></p>
 <p style="margin: 0.2em 0 0.2em 2em;">6: &ensp; <b>if</b> no valid $(R, t)$ found, <b>continue</b> to next iteration</p>
@@ -302,7 +303,7 @@ The mathematical model we hope to estimate is the rotation and translation that 
 </details>
 
 <details open class="section" markdown="1">
-<summary>Step 5: Triangulating Inliers to generate Point Cloud (0 points, done for you)</summary>
+<summary>Step 5: Triangulating Inliers to generate Point Cloud (10 points, done for you)</summary>
 
 Now that we have the camera poses ($R$ and $t$ from Step 4) and the inlier correspondences, we can recover the 3D positions of the matched points via [triangulation](https://en.wikipedia.org/wiki/Triangulation_(computer_vision)). This part is already done for you, but you will need to load the outputs into [Viser](https://viser.studio/) and show screenshots of the sparse point cloud. If the previous steps are implemented properly and `main.py` executes, a viser command will be outputted at the very end of the script. 
 
@@ -388,7 +389,7 @@ For the staff-provided images, report the following:
 
 You are required to use the staff-provided images (provided in the [overview](#overview)) for full credit on this assignment. 
 
-For extra credit, reconstruct your own scene with our simple SfM pipeline on 2 images of your own. You get 10 points if you can get a decent reconstruction, and we will also be voting on the best custom scenes! **For this section, stick to the current pipeline. You are allowed to modify: scene contents, image resolution, and config hyperparameters.**
+For extra credit, reconstruct your own scene with our simple SfM pipeline on 2 images of your own. You get 10 points if you can get a decent reconstruction, and we will also be voting on the best custom scenes! **For this section, stick to the current pipeline. You are allowed to modify: scene contents (via the photos you take), image resolution, and config hyperparameters.**
 
 You'll need to provide the parameters for your own camera used. If this is difficult to access online, you can try accessing the image metadata and recover the parameters.
 
@@ -404,15 +405,18 @@ Advice:
 
 
 <details markdown="1">
-<summary style="font-size: large; font-variant: small-caps; font-weight: bold; cursor: pointer;">Improve the staff solution (10 points, competition) </summary>
+<summary style="font-size: large; font-variant: small-caps; font-weight: bold; cursor: pointer;">Improve the staff solution (class competition) </summary>
 
-Improve on the staff-provided scene by adjusting the pipeline hyperparameters. You will likely need to use the higher resolution image as well. You'll be awarded 10 points if you can get a noticeable improvement, and even more goodies if ranked high in the competition!
+Improve on the staff-provided scene! You are allowed to make changes as long as they maintain our 6-step pipeline. This includes but isn't strictly limited to adjusting the hyperparameters. Since it's not super well-defined what's a "better" point cloud, we'll do a user-study: we'll do a class vote and vote for the best results!
 
 **More details on competition to come**.
 
 </details>
 
 </details>
+
+---
+
 
 <p style="font-size: 0.85em; font-style: italic; margin: 1em;">Appendix with math explanations will be released soon.</p>
 

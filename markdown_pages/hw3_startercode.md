@@ -17,7 +17,7 @@ published: true
 
 Clone the starter code from the GitHub repository:
 
-**[https://github.com/coms4732/hw3_starter/](https://github.com/coms4732/hw3_starter_testing/)**
+**[https://github.com/coms4732/hw3_starter/](https://github.com/coms4732/hw3_starter/)**
 
 ## Setup
 
