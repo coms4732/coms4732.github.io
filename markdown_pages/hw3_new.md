@@ -110,7 +110,6 @@ processEscapes: true
   details.section > summary {
     font-size: x-large;
     text-align: left;
-    font-variant: small-caps;
     font-weight: bold;
     cursor: pointer;
     padding: 0.25em 0;
@@ -436,7 +435,7 @@ To see how we got here, we first observe that $x'$ is related to $x$ by a rotati
 
 $$x' = Rx + t$$
 
-where $t$ is the translation from camera 1's center of projection $O$ to camera 2's center of projection $O'$. $R$ is the rotation from camera 1's coordinate system to camera 2's coordinate system.
+where $t$ is the translation from camera 1's center of projection $O$ to camera 2's center of projection $O'$. $R$ is camera 2's orientation in camera 1's frame.
 
 We observe that $x$, $x'$, and $t$ are all coplanar and would like to encode this constraint in a meaningful way. We define the normal vector to the plane as $n = t \times x'$ and substitute in the expression for $x'$:
 
@@ -515,7 +514,28 @@ Regardless of scale factor $\lambda$, we cannot recover the magnitude of $t$ fro
 
 <h3 id="ransac-camera-motion">RANSAC for camera motion estimation</h3>
 
-We'll solve our system of equations $Ae = 0$ with [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus). At a high level, we iteratively estimate $e$ from a collection of correspondences (some of which are noisy/outliers) for some $T$ iterations until $e$ is 'good enough'. We say $e$ is good enough when it can accurately enough relate the rotation and translation between correspondences from images 1 and 2: we estimate randomly sample $n$ correspondences and estimate $e$ from them, apply it on some feature in image 1, and see if it lands within some $\epsilon$ distance to the corresponding feature in image 2. If it's within $\epsilon$ distance, we say that this correspondence pair is an *inlier*–otherwise, it's an *outlier*. The best $e$ will be the one that, after $T$ iterations, yields the highest number of inliers. Optionally, at the very end of the $T$ iterations, we can compute the inliers using our $e$ estimate, then *fit* $e$ *again* on the inliers only, yielding an even better $e$ estimate. We can then decompose $e$ into our $R$ and $t$ components.
+We'll solve our system of equations $Ae = 0$ with [RANSAC](https://en.wikipedia.org/wiki/Random_sample_consensus). 
+
+At a high level, we iteratively estimate $e$ from a collection of correspondences (some of which are noisy/outliers) for $T$ iterations until $e$ is 'good enough'. 
+
+We say $e$ is good enough when it can accurately enough relate the rotation and translation between correspondences from images 1 and 2: we estimate randomly sample $n$ correspondences and estimate $e$ from them, apply it on some feature in image 1, and see if it lands within some $\epsilon$ distance to the corresponding feature in image 2. 
+
+If it's within $\epsilon$ distance, we say that this correspondence pair is an *inlier*––otherwise, it's an *outlier*. The best $e$ will be the one that, after $T$ iterations, yields the highest number of inliers. Optionally, at the very end of the $T$ iterations, we can compute the inliers using our $e$ estimate, then *fit* $e$ *again* on the inliers only, yielding an even better $e$ estimate. We can then decompose $e$ into our $R$ and $t$ components.
+
+#### Variants of RANSAC
+There are different flavors of RANSAC.
+
+For example, you may decide, after running all your RANSAC iterations, to refit $E$ only on the inliers associated with the best $E$ you found so far.
+
+You may also decide to do this fit-$E$-on-inliers-only approach *within* each iteration, not just after the loop. This, at a high level, is [locally-optimized RANSAC](https://cmp.felk.cvut.cz/~matas/papers/chum-dagm03.pdf).
+
+### Decomposing $E$ into $R$ and $t$
+
+Now for some linear algebra.
+
+
+
+
 
 
 ### Acknowledgements

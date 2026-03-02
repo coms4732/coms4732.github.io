@@ -3,8 +3,8 @@ title: Homework 4
 layout: default
 permalink: /hw4/
 mathjax: true
-nav_order: 5
-published: false
+nav_exclude: true
+published: true
 ---
 
 <script>
@@ -15,6 +15,26 @@ published: false
   };
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  /* Collapsible section styles */
+  details.section {
+    margin: 0.5em 0;
+  }
+
+  details.section > summary {
+    font-size: x-large;
+    text-align: left;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0.25em 0;
+    list-style: revert;
+  }
+
+  details.section > summary::-webkit-details-marker {
+    display: initial;
+  }
+</style>
 
 <header>
   <h1>
@@ -27,14 +47,28 @@ published: false
 
 # Neural Radiance Fields!
 
-## <span style="color: red;">Due Date: TBD</span>
+## <span style="color: red;">Due Date: Thursday March 26, 11:59pm ET (3 weeks)</span>
+
+<div style="text-align: center; margin: 1em 0;">
+  <video width="320" height="320" autoplay muted loop style="display: inline-block">
+    <source type="video/mp4" src="/hws/hw4/assets/video_2.5h.mp4" />
+  </video>
+</div>
+
 <span style="color: red;">**START EARLY!**</span> This, along with HW5, are by far the most difficult assignments this semester.
+
+<p style="font-size: 0.85em; margin: 0.5em 1em;">
+  <a href="javascript:void(0)" id="toggle-all" onclick="(function(){var d=document.querySelectorAll('details.section'),open=d[0]&&!d[0].open;d.forEach(function(el){el.open=open});document.getElementById('toggle-all').textContent=open?'Collapse all':'Expand all'})()">Collapse all</a>
+</p>
+
+<details open class="section" markdown="1">
+<summary>Overview</summary>
+
+In HW2, we used a simple feature matching procedure to find correspondences between two images. In HW3, we did simple structure from motion (SfM) to estimate the 3D camera poses for 2 images. In this homework, you will use the outputs of an off-the-shelf SfM pipeline (COLMAP) to build a NeRF of your own object.
 
 **Note on compute requirements:** We're using PyTorch to implement neural networks with GPU acceleration. If you have an M-series Mac (M1/M2/M3), you should be able to run everything locally using the [MPS backend](https://pytorch.org/docs/stable/notes/mps.html). For older or less powerful hardware, we recommend using GPUs from [Colab](https://colab.research.google.com/). Colab Pro is now [free](https://colab.research.google.com/signup) for students.
 
-### Overview
-
-In HW2, we used a simple feature matching procedure to find correspondences between two images. In HW3, we did simple structure from motion (SfM) to estimate the 3D camera poses for 2 images. In this homework, you will use the outputs of an off-the-shelf SfM pipeline to build a NeRF of your own object.
+</details>
 
 ---
 <!-- 
@@ -220,7 +254,8 @@ As a sanity check you can test your calibration implementation on our [calibrati
 
 --- -->
 
-# Part 1: Fit a Neural Field to a 2D Image
+<details open class="section" markdown="1">
+<summary>Part 1: Fit a Neural Field to a 2D Image</summary>
 
 From lecture we know that we can use a Neural Radiance Field (NeRF) ($$ F: \{x, y, z, \theta, \phi\} \rightarrow \{r, g, b, \sigma\} $$) to represent a 3D space. But before jumping into 3D, let's first get familar with NeRF (and PyTorch) using a 2D example. In fact, since there is no concept of radiance in 2D, the Neural Radiance Field falls back to just a Neural Field ($$ F: \{u, v\} \rightarrow \{r, g, b\} $$) in 2D, in which $$ \{u, v\} $$ is the pixel coordinate. In this section, we will create a neural field that can represent a 2D image and optimize that neural field to fit this image. You can start from [this image](https://live.staticflickr.com/7492/15677707699_d9d67acf9d_b.jpg), but feel free to try out any other images.
 
@@ -254,36 +289,14 @@ $$
 - Show final results for 2 choices of max positional encoding frequency and 2 choices of width (a 2x2 grid of results). Try very low values for these hyperparameters to see how it affects the outputs.
 - Show the PSNR curve for training on one image of your choice.
 
----
+</details>
 
-# Part 2: Fit a Neural Radiance Field from Multi-view Images
+<details open class="section" markdown="1">
+<summary>Part 2: Fit a Neural Radiance Field from Multi-view Images</summary>
 
-Now that we are familiar with using a neural field to represent a image, we can proceed to a more interesting task that using a neural *radiance* field to represent a 3D space, through inverse rendering from multi-view calibrated images. For this part we are going to use the Lego scene from the original [NeRF paper](https://www.matthewtancik.com/nerf), but with lower resolution images (200 x 200) and preprocessed cameras (downloaded from [here](/hws/hw4/assets/lego_200x200.npz)). The following code can be used to parse the data. The figure on its right shows a plot of all the cameras, including training cameras in black, validation cameras in red, and test cameras in green.
+Now that we are familiar with using a neural field to represent a image, we can proceed to a more interesting task that using a neural *radiance* field to represent a 3D space, through inverse rendering from multi-view calibrated images. For this part we are going to use the Lego scene from the original [NeRF paper](https://www.matthewtancik.com/nerf), but with lower resolution images (200 x 200) and preprocessed cameras (downloaded from [here](/hws/hw4/assets/lego_200x200.npz)). The figure on its right shows a plot of all the cameras, including training cameras in black, validation cameras in red, and test cameras in green.
 
-```python
-data = np.load(f"lego_200x200.npz")
-
-# Training images: [100, 200, 200, 3]
-images_train = data["images_train"] / 255.0
-
-# Cameras for the training images 
-# (camera-to-world transformation matrix): [100, 4, 4]
-c2ws_train = data["c2ws_train"]
-
-# Validation images: 
-images_val = data["images_val"] / 255.0
-
-# Cameras for the validation images: [10, 4, 4]
-# (camera-to-world transformation matrix): [10, 200, 200, 3]
-c2ws_val = data["c2ws_val"]
-
-# Test cameras for novel-view video rendering: 
-# (camera-to-world transformation matrix): [60, 4, 4]
-c2ws_test = data["c2ws_test"]
-
-# Camera focal length
-focal = data["focal"]  # float
-```
+The code found [here](/hws/hw4/load_data.txt) can be used to parse the data.
 
 ![data plot](/hws/hw4/assets/data_plot.png)
 
@@ -334,106 +347,15 @@ $$
 
 ## Part 2.3: Putting the Dataloading All Together
 
-Similar to Part 1, you would need to write a dataloader that randomly sample pixels from multiview images. What is different with Part 1, is that now you need to convert the pixel coordinates into rays in your dataloader, and return ray origin, ray direction and pixel colors from your dataloader. To verify if you have by far implement everything correctly, we here provide some visualization code to plot the cameras, rays, and samples in 3D. We additionally recommend you try this code with rays sampled only from one camera so you can make sure that all the rays stay within the camera frustum and eliminating the possibility of other smaller harder to catch bugs.
+Similar to Part 1, you would need to write a dataloader that randomly sample pixels from multiview images. What is different with Part 1, is that now you need to convert the pixel coordinates into rays in your dataloader, and return ray origin, ray direction and pixel colors from your dataloader. 
 
-```python
-import viser, time  # pip install viser
-import numpy as np
+To verify if you have by far implement everything correctly, we here provide some Viser visualization code [here](/hws/hw4/vis_rays.txt) to plot the cameras, rays, and samples in 3D. We additionally recommend you try this code with rays sampled only from one camera so you can make sure that all the rays stay within the camera frustum and eliminating the possibility of other smaller harder to catch bugs.
 
-# --- You Need to Implement These ------
-dataset = RaysData(images_train, K, c2ws_train)
-rays_o, rays_d, pixels = dataset.sample_rays(100) # Should expect (B, 3)
-points = sample_along_rays(rays_o, rays_d, perturb=True)
-H, W = images_train.shape[1:3]
-# ---------------------------------------
-
-server = viser.ViserServer(share=True)
-for i, (image, c2w) in enumerate(zip(images_train, c2ws_train)):
-    server.add_camera_frustum(
-        f"/cameras/{i}",
-        fov=2 * np.arctan2(H / 2, K[0, 0]),
-        aspect=W / H,
-        scale=0.15,
-        wxyz=viser.transforms.SO3.from_matrix(c2w[:3, :3]).wxyz,
-        position=c2w[:3, 3],
-        image=image
-    )
-for i, (o, d) in enumerate(zip(rays_o, rays_d)):
-    server.add_spline_catmull_rom(
-        f"/rays/{i}", positions=np.stack((o, o + d * 6.0)),
-    )
-server.add_point_cloud(
-    f"/samples",
-    colors=np.zeros_like(points).reshape(-1, 3),
-    points=points.reshape(-1, 3),
-    point_size=0.02,
-)
-
-while True:
-    time.sleep(0.1)  # Wait to allow visualization to run
-```
-
-![viser plot](/hws/hw4/assets/viser_plot.png)
-
-```python
-# Visualize Cameras, Rays and Samples
-import viser, time
-import numpy as np
-
-# --- You Need to Implement These ------
-dataset = RaysData(images_train, K, c2ws_train)
-
-# This will check that your uvs aren't flipped
-uvs_start = 0
-uvs_end = 40_000
-sample_uvs = dataset.uvs[uvs_start:uvs_end] # These are integer coordinates of widths / heights (xy not yx) of all the pixels in an image
-# uvs are array of xy coordinates, so we need to index into the 0th image tensor with [0, height, width], so we need to index with uv[:,1] and then uv[:,0]
-assert np.all(images_train[0, sample_uvs[:,1], sample_uvs[:,0]] == dataset.pixels[uvs_start:uvs_end])
-
-# # Uncoment this to display random rays from the first image
-# indices = np.random.randint(low=0, high=40_000, size=100)
-
-# # Uncomment this to display random rays from the top left corner of the image
-# indices_x = np.random.randint(low=100, high=200, size=100)
-# indices_y = np.random.randint(low=0, high=100, size=100)
-# indices = indices_x + (indices_y * 200)
-
-data = {"rays_o": dataset.rays_o[indices], "rays_d": dataset.rays_d[indices]}
-points = sample_along_rays(data["rays_o"], data["rays_d"], random=True)
-# ---------------------------------------
-
-server = viser.ViserServer(share=True)
-for i, (image, c2w) in enumerate(zip(images_train, c2ws_train)):
-  server.add_camera_frustum(
-    f"/cameras/{i}",
-    fov=2 * np.arctan2(H / 2, K[0, 0]),
-    aspect=W / H,
-    scale=0.15,
-    wxyz=viser.transforms.SO3.from_matrix(c2w[:3, :3]).wxyz,
-    position=c2w[:3, 3],
-    image=image
-  )
-for i, (o, d) in enumerate(zip(data["rays_o"], data["rays_d"])):
-  positions = np.stack((o, o + d * 6.0))
-  server.add_spline_catmull_rom(
-      f"/rays/{i}", positions=positions,
-  )
-server.add_point_cloud(
-    f"/samples",
-    colors=np.zeros_like(points).reshape(-1, 3),
-    points=points.reshape(-1, 3),
-    point_size=0.03,
-)
-
-while True:
-    time.sleep(0.1)  # Wait to allow visualization to run
-```
-
-![viser plot of a single image (v1)](/hws/hw4/assets/single-camera-1.png)
-
-![viser plot of a single image (v2)](/hws/hw4/assets/single-camera-2.png)
-
-![viser plot of top left rays in a single image](/hws/hw4/assets/upper-left-single-camera.png)
+<div style="display: flex; justify-content: center; gap: 1em; margin: 1em 0;">
+  <img src="/hws/hw4/assets/single-camera-1.png" alt="viser plot of a single image (v1)" style="max-width: 32%; height: auto;">
+  <img src="/hws/hw4/assets/single-camera-2.png" alt="viser plot of a single image (v2)" style="max-width: 32%; height: auto;">
+  <img src="/hws/hw4/assets/upper-left-single-camera.png" alt="viser plot of top left rays in a single image" style="max-width: 32%; height: auto;">
+</div>
 
 ---
 
@@ -466,30 +388,7 @@ $$
 $$ 
 where $$ \mathbf{c}_i $$ is the color obtained from our network at sample location $$ i $$, $$ T_i $$ is the probability of a ray *not* terminating before sample location $$ i $$, and $$ 1 - e^{-\sigma_i \delta_i} $$ is the probability of terminating at sample location $$ i $$.
 
-If your volume rendering works, the following snippet of code should pass the assert statement:
-
-```python
-import torch
-torch.manual_seed(42)
-sigmas = torch.rand((10, 64, 1))
-rgbs = torch.rand((10, 64, 3))
-step_size = (6.0 - 2.0) / 64
-rendered_colors = volrend(sigmas, rgbs, step_size)
-
-correct = torch.tensor([
-    [0.5006, 0.3728, 0.4728],
-    [0.4322, 0.3559, 0.4134],
-    [0.4027, 0.4394, 0.4610],
-    [0.4514, 0.3829, 0.4196],
-    [0.4002, 0.4599, 0.4103],
-    [0.4471, 0.4044, 0.4069],
-    [0.4285, 0.4072, 0.3777],
-    [0.4152, 0.4190, 0.4361],
-    [0.4051, 0.3651, 0.3969],
-    [0.3253, 0.3587, 0.4215]
-])
-assert torch.allclose(rendered_colors, correct, rtol=1e-4, atol=1e-4)
-```
+If your volume rendering works, the following snippet of code ([Python](/hws/hw4/volrend_test.txt)) should pass the assert statement.
 
 <span style="color: red;">**[Impl]**</span> Here you will implement the volume rendering equation for a batch of samples along a ray. This rendered color is what we will compare with our posed images in order to train our network. You would need to implement this part in torch instead of numpy because we need the loss to be able to backpropagate through this part. A hint is that you may find [torch.cumsum](https://pytorch.org/docs/stable/generated/torch.cumsum.html) or [torch.cumprod](https://pytorch.org/docs/stable/generated/torch.cumprod.html) useful here.
 
@@ -509,9 +408,10 @@ assert torch.allclose(rendered_colors, correct, rtol=1e-4, atol=1e-4)
   <source type="video/mp4" src="/hws/hw4/assets/video_2.5h.mp4" />
 </video>
 
----
+</details>
 
-## Part 3: Training a NeRF with Your Own Data
+<details open class="section" markdown="1">
+<summary>Part 3: Training a NeRF with Your Own Data</summary>
 
 We will now create a NeRF with our own real-world data. Our aim is to create an .npz file that contains the data in the same format as the Lego dataset, with some modifications.
 
@@ -562,59 +462,11 @@ Helpful Tips / Common Mistakes:
 ### Part 3.4 Visualizing the Output
 For debugging purposes, look at the intermediate renders you created in part 3.3.
 
-For the deliverable, create a gif where the camera is orbiting the object and showing the rendered views. We encourage you to use the code below to help you visualize the scene. A couple of helpful tips:
+For the deliverable, create a gif where the camera is orbiting the object and showing the rendered views. We encourage you to use the provided code ([Python](/hws/hw4/vis_orbit.txt)) to help you visualize the scene. A couple of helpful tips:
 
-- Your axes may be flipped compared to the code below. You may need to play around with different axes of rotation.
+- Your axes may be flipped compared to the provided code. You may need to play around with different axes of rotation.
 - Your scene scale will likely be different for each scene you capture. You will likely need to play around with the `near` and `far` parameters and the camera starting position to get the best results.
   - For example, if it looks like your camera is only rotating around an axis but not translating around an object, you are likely too close to the scene origin and need to move back.
-
-```python
-def look_at_origin(pos):
-  # Camera looks towards the origin
-  forward = -pos / np.linalg.norm(pos)  # Normalize the direction vector
-
-  # Define up vector (assuming y-up)
-  up = np.array([0, 1, 0])
-
-  # Compute right vector using cross product
-  right = np.cross(up, forward)
-  right = right / np.linalg.norm(right)
-
-  # Recompute up vector to ensure orthogonality
-  up = np.cross(forward, right)
-
-  # Create the camera-to-world matrix
-  c2w = np.eye(4)
-  c2w[:3, 0] = right
-  c2w[:3, 1] = up
-  c2w[:3, 2] = forward
-  c2w[:3, 3] = pos
-
-  return c2w
-
-def rot_x(phi):
-    return np.array([
-        [math.cos(phi), -math.sin(phi), 0, 0],
-        [math.sin(phi), math.cos(phi), 0, 0],
-        [0,0,1,0],
-        [0,0,0,1],
-    ])
-
-# TODO: Change start position to a good position for your scene such as 
-# the translation vector of one of your training camera extrinsics
-START_POS = np.array([1., 0., 0.])
-NUM_SAMPLES = 60
-
-frames = []
-for phi in np.linspace(360., 0., NUM_SAMPLES, endpoint=False):
-    c2w = look_at_origin(START_POS)
-    extrinsic = rot_x(phi/180.*np.pi) @ c2w
-    
-    # Generate view for this camera pose
-    # TODO: Add code for generating a view with your model from the current extrinsic
-    frame = ...
-    frames.append(frame)
-```
 
 <span style="color: darkgreen;">**[Deliverables]**</span> Create a gif of a camera circling the object showing novel views and discuss any code or hyperparameter changes you had to make. Include a plot of the training loss as well as some intermediate renders of the scene while it is training.
 
@@ -630,9 +482,10 @@ for phi in np.linspace(360., 0., NUM_SAMPLES, endpoint=False):
 </div>
 
 
----
+</details>
 
-## Bells & Whistles (Optional)
+<details open class="section" markdown="1">
+<summary>Bells & Whistles (Optional)</summary>
 
 <!-- ### Required for CS 280A students only: -->
 
@@ -653,9 +506,10 @@ The following are optional explorations for any students interested in going dee
   <source type="video/mp4" src="/hws/hw4/assets/depths.mp4" />
 </video>
 
----
+</details>
 
-# Deliverables Checklist
+<details class="section" markdown="1">
+<summary>Deliverables Checklist</summary>
 
 Make sure your submission includes all of the following:
 
@@ -691,6 +545,8 @@ Make sure your submission includes all of the following:
 
 - Depth map video for the Lego scene
 - Any additional exploration you do!
+
+</details>
 
 ## Acknowledgements
 
