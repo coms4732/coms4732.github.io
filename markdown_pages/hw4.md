@@ -47,13 +47,15 @@ published: true
 
 # Neural Radiance Fields!
 
-## <span style="color: red;">Due Date: Thursday March 26, 11:59pm ET (3 weeks)</span>
+## <span style="color: red;">Due Date: Friday  March 27, 11:59pm ET (3 weeks)</span>
 
 <div style="text-align: center; margin: 1em 0;">
   <video width="320" height="320" autoplay muted loop style="display: inline-block">
     <source type="video/mp4" src="/hws/hw4/assets/video_2.5h.mp4" />
   </video>
 </div>
+
+<span style="color: darkgreen;">**Starter code can be found [here](/hw4_startercode/).**</span>
 
 <span style="color: red;">**START EARLY!**</span> This, along with HW5, are by far the most difficult assignments this semester.
 
@@ -302,7 +304,9 @@ The code found [here](/hws/hw4/load_data.txt) can be used to parse the data.
 
 ---
 
-## Part 2.1: Create Rays from Cameras
+## Part 2.1: Create Rays from Cameras (implemented for you)
+
+![Coordinate Spaces](/hws/hw4/assets/coordinate_spaces.png)
 
 **Camera to World Coordinate Conversion.** The transformation between the world space $$ \mathbf{X_w} = (x_w, y_w, z_w) $$ and the camera space $$ \mathbf{X_c} = (x_c, y_c, z_c) $$ can be defined as a rotation matrix $$ \mathbf{R}_{3 \times 3} $$ and a translation vector $$ \mathbf{t} $$: 
 $$
@@ -310,7 +314,7 @@ $$
 $$ 
 in which $$ \begin{bmatrix} \mathbf{R}_{3\times3} & \mathbf{t} \\ \mathbf{0}_{1\times3} & 1 \end{bmatrix} $$ is called world-to-camera (`w2c`) transformation matrix, or extrinsic matrix. The inverse of it is called camera-to-world (`c2w`) transformation matrix.
 
-<span style="color: red;">**[Impl]**</span> In this session you would need to implement a function `x_w = transform(c2w, x_c)` that transform a point from camera to the world space. You can verify your implementation by checking if the follow statement is always true: `x == transform(c2w.inv(), transform(c2w, x))`. Note you might want your implementation to support batched coordinates for later use. You can implement it with either numpy or torch.
+<!-- <span style="color: darkgreen;">**[Implementation given]**</span> Here we implement a function `x_w = transform(c2w, x_c)` that transform a point from camera to the world space. You can verify your implementation by checking if the follow statement is always true: `x == transform(c2w.inv(), transform(c2w, x))`. Note you might want your implementation to support batched coordinates for later use. You can implement it with either numpy or torch. -->
 
 **Pixel to Camera Coordinate Conversion.** Consider a pinhole camera with focal length $$ (f_x, f_y) $$ and principal point $$ (o_x = \text{image_width} / 2, o_y = \text{image_height} / 2) $$, its intrinsic matrix $$ \mathbf{K} $$ is defined as: 
 $$
@@ -322,7 +326,7 @@ s \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = \mathbf{K} \begin{bmatrix} x_c \\ 
 $$ 
 in which $$ s=z_c $$ is the depth of this point along the optical axis.
 
-<span style="color: red;">**[Impl]**</span> In this session you would need to implement a function that invert the aforementioned process, which transform a point from the pixel coordinate system back to the camera coordinate system: `x_c = pixel_to_camera(K, uv, s)`. Similar to the previous session, you might also want your implementation here to support batched coordinates for later use. You can implement it with either numpy or torch.
+<!-- <span style="color: darkgreen;">**[Implementation given]**</span> Here we implement a function that invert the aforementioned process, which transform a point from the pixel coordinate system back to the camera coordinate system: `x_c = pixel_to_camera(K, uv, s)`. Similar to the previous section, you might also want your implementation here to support batched coordinates for later use. You can implement it with either numpy or torch. -->
 
 **Pixel to Ray.** A ray can be defined by an origin vector $$ \mathbf{r}_o \in \mathbb{R}^3 $$ and a direction vector $$ \mathbf{r}_d \in \mathbb{R}^3 $$. In the case of a pinhole camera, we want to know the $$ \{\mathbf{r}_o, \mathbf{r}_d\} $$ for every pixel $$ (u, v) $$. The origin $$ \mathbf{r}_o $$ of those rays is easy to get because it is just the location of the camera in world coordinates. For a camera-to-world (c2w) transformation matrix $$ \begin{bmatrix} \mathbf{R}_{3\times3} & \mathbf{t} \\ \mathbf{0}_{1\times3} & 1 \end{bmatrix} $$, the camera origin is simply the translation component: 
 $$
@@ -333,11 +337,13 @@ $$
 \mathbf{r}_d = \frac{\mathbf{X_w} - \mathbf{r}_o}{\|\mathbf{X_w} - \mathbf{r}_o\|_2}
 $$
 
-<span style="color: red;">**[Impl]**</span> In this section you will need to implement a function that converts a pixel coordinate to a ray with origin and normalized direction: `ray_o, ray_d = pixel_to_ray(K, c2w, uv)`. You might find your previously implemented functions useful here. Similarly, you might also want your implementation to support batched coordinates.
+<span style="color: darkgreen;">**[Implementation given]**</span> Here we implement a function that converts a pixel coordinate to a ray with origin and normalized direction: `ray_o, ray_d = pixel_to_ray(K, c2w, uv)`. You might find your previously implemented functions useful here. Similarly, you might also want your implementation to support batched coordinates.
 
 ---
 
 ## Part 2.2: Sampling
+
+![NeRF Sampling](/hws/hw4/assets/nerf_sampling.png)
 
 <span style="color: red;">**[Impl: Sampling Rays from Images]**</span> In Part 1, we have done random sampling on a single image to get the pixel color and pixel coordinates. Here we can build on top of that, and with the camera intrinsics & extrinsics, we would be able to convert the pixel coordinates into ray origins and directions. Make sure to account for the offset from image coordinate to pixel center (this can be done simply by adding .5 to your UV pixel coordinate grid)! Since we have multiple images now, we have two options of sampling rays. Say we want to sample N rays at every training iteration, option 1 is to first sample M images, and then sample N // M rays from every image. The other option is to flatten all pixels from all images and do a global sampling once to get N rays from all images. You can choose whichever way you do ray sampling.
 
@@ -350,6 +356,8 @@ $$
 Similar to Part 1, you would need to write a dataloader that randomly sample pixels from multiview images. What is different with Part 1, is that now you need to convert the pixel coordinates into rays in your dataloader, and return ray origin, ray direction and pixel colors from your dataloader. 
 
 To verify if you have by far implement everything correctly, we here provide some Viser visualization code [here](/hws/hw4/vis_rays.txt) to plot the cameras, rays, and samples in 3D. We additionally recommend you try this code with rays sampled only from one camera so you can make sure that all the rays stay within the camera frustum and eliminating the possibility of other smaller harder to catch bugs.
+
+**Note**: you will have to provide these visualization results in your submission.
 
 <div style="display: flex; justify-content: center; gap: 1em; margin: 1em 0;">
   <img src="/hws/hw4/assets/single-camera-1.png" alt="viser plot of a single image (v1)" style="max-width: 32%; height: auto;">
@@ -369,11 +377,20 @@ To verify if you have by far implement everything correctly, we here provide som
 
 Below is a structure of the network that you can start with:
 
+<div style="text-align: center;">
+  <img src="/hws/hw4/assets/nerf_pipeline.svg" alt="NeRF Pipeline" style="max-width: 50%;">
+</div>
+
 ![MLP](/hws/hw4/assets/mlp_nerf.png)
 
 ---
 
 ## Part 2.5: Volume Rendering
+
+<div style="text-align: center;">
+  <img src="/hws/hw4/assets/volume.svg" alt="Volume Rendering" style="max-width: 50%;">
+</div>
+
 The core volume rendering equation is as follows:
 
 $$
@@ -388,9 +405,7 @@ $$
 $$ 
 where $$ \mathbf{c}_i $$ is the color obtained from our network at sample location $$ i $$, $$ T_i $$ is the probability of a ray *not* terminating before sample location $$ i $$, and $$ 1 - e^{-\sigma_i \delta_i} $$ is the probability of terminating at sample location $$ i $$.
 
-If your volume rendering works, the following snippet of code ([Python](/hws/hw4/volrend_test.txt)) should pass the assert statement.
-
-<span style="color: red;">**[Impl]**</span> Here you will implement the volume rendering equation for a batch of samples along a ray. This rendered color is what we will compare with our posed images in order to train our network. You would need to implement this part in torch instead of numpy because we need the loss to be able to backpropagate through this part. A hint is that you may find [torch.cumsum](https://pytorch.org/docs/stable/generated/torch.cumsum.html) or [torch.cumprod](https://pytorch.org/docs/stable/generated/torch.cumprod.html) useful here.
+<span style="color: darkgreen;">**[Implementation provided]**</span> Here you will implement the volume rendering equation for a batch of samples along a ray. This rendered color is what we will compare with our posed images in order to train our network. You would need to implement this part in torch instead of numpy because we need the loss to be able to backpropagate through this part. A hint is that you may find [torch.cumsum](https://pytorch.org/docs/stable/generated/torch.cumsum.html) or [torch.cumprod](https://pytorch.org/docs/stable/generated/torch.cumprod.html) useful here.
 
 <span style="color: darkgreen;">**[Deliverables]**</span> As a reference, the images below show the process of optimizing the network to fit on our lego multi-view images from a novel view. The staff solution reaches above 23 PSNR with 1000 gradient steps and a batchsize of 10K rays per gradent step. The staff solution uses an Adam optimizer with a learning rate of 5e-4. For guaranteed full credit, achieve 23 PSNR for any number of iterations.
 
@@ -411,7 +426,7 @@ If your volume rendering works, the following snippet of code ([Python](/hws/hw4
 </details>
 
 <details open class="section" markdown="1">
-<summary>Part 3: Training a NeRF with Your Own Data</summary>
+<summary>Part 3: Training a NeRF with Your Own Data (10 pt. extra credit)</summary>
 
 We will now create a NeRF with our own real-world data. Our aim is to create an .npz file that contains the data in the same format as the Lego dataset, with some modifications.
 
@@ -511,7 +526,7 @@ The following are optional explorations for any students interested in going dee
 <details class="section" markdown="1">
 <summary>Deliverables Checklist</summary>
 
-Make sure your submission includes all of the following:
+Make sure your submission (website + pdf) includes all of the following:
 
 <!-- - Submit your webpage public URL to the class gallery by filling out [this](https://forms.gle/nbpg6wATeCDU5sj49) form. -->
 
@@ -534,7 +549,7 @@ Make sure your submission includes all of the following:
 - PSNR curve on the validation set
 - Spherical rendering video of the Lego using provided test cameras
 
-## Part 3: Training with Your Own Data
+## Part 3: Training with Your Own Data (extra credit)
 
 - GIF of camera circling your object showing novel views
 - Discussion of code or hyperparameter changes you made
