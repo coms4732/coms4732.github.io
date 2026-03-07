@@ -298,7 +298,7 @@ $$
 
 Now that we are familiar with using a neural field to represent a image, we can proceed to a more interesting task that using a neural *radiance* field to represent a 3D space, through inverse rendering from multi-view calibrated images. For this part we are going to use the Lego scene from the original [NeRF paper](https://www.matthewtancik.com/nerf), but with lower resolution images (200 x 200) and preprocessed cameras (downloaded from [here](/hws/hw4/assets/lego_200x200.npz)). The figure on its right shows a plot of all the cameras, including training cameras in black, validation cameras in red, and test cameras in green.
 
-The code found [here](/hws/hw4/load_data.txt) can be used to parse the data.
+The code found [here]([/hws/hw4/load_data.txt](https://github.com/coms4732/hw4_starter/blob/e493aadfe7de2f1d729aee2b89dbf3f210f39040/dataset_3d.py#L8-L54)) can be used to parse the data.
 
 ![data plot](/hws/hw4/assets/data_plot.png)
 
@@ -355,7 +355,7 @@ $$
 
 Similar to Part 1, you would need to write a dataloader that randomly sample pixels from multiview images. What is different with Part 1, is that now you need to convert the pixel coordinates into rays in your dataloader, and return ray origin, ray direction and pixel colors from your dataloader. 
 
-To verify if you have by far implement everything correctly, we here provide some Viser visualization code [here](/hws/hw4/vis_rays.txt) to plot the cameras, rays, and samples in 3D. We additionally recommend you try this code with rays sampled only from one camera so you can make sure that all the rays stay within the camera frustum and eliminating the possibility of other smaller harder to catch bugs.
+To verify if you have by far implement everything correctly, we here provide some Viser visualization code [here]([/hws/hw4/vis_rays.txt](https://github.com/coms4732/hw4_starter/blob/main/visualize_viser.py)) to plot the cameras, rays, and samples in 3D. We additionally recommend you try this code with rays sampled only from one camera so you can make sure that all the rays stay within the camera frustum and eliminating the possibility of other smaller harder to catch bugs.
 
 **Note**: you will have to provide these visualization results in your submission.
 
