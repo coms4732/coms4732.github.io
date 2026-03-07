@@ -15,7 +15,7 @@ published: true
 
 ## Repository
 
-Clone the starter code from the GitHub repository:
+Fragemented starter code for parts 2 and 3 of HW4 can be found in the repo here:
 
 **[https://github.com/coms4732/hw4_starter/](https://github.com/coms4732/hw4_starter/)**
 
