@@ -4,7 +4,7 @@ layout: default
 permalink: /hw5/part-a/
 parent: Homework 5
 nav_order: 1
-published: false
+published: true
 ---
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -566,7 +566,43 @@ padding: 5px;
   width: auto !important;
   max-width: none !important;
 }
-    
+
+/* Collapsible section styles */
+details.section {
+  margin: 0.5em 0;
+}
+
+details.section > summary {
+  font-size: x-large;
+  text-align: left;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.25em 0;
+  list-style: revert;
+}
+
+details.section > summary::-webkit-details-marker {
+  display: initial;
+}
+
+/* Collapsible subsection styles */
+details.subsection {
+  margin: 0.5em 0;
+}
+
+details.subsection > summary {
+  font-size: large;
+  text-align: left;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.25em 0;
+  list-style: revert;
+}
+
+details.subsection > summary::-webkit-details-marker {
+  display: initial;
+}
+
 </style>
 
 <div class="image-container hero-images">
@@ -621,7 +657,7 @@ Fire</b></p>
 [Part B](/hw5/part-b/)
 
 <h2 style="text-align: center">
-<b style="color: red;">Due: TBD</b>
+<b style="color: red;">Due: Thursday, April 16 11:59pm PT</b>
 </h2>
 <h4 style="text-align: center">
 <b>We recommend using GPUs from <a
@@ -629,7 +665,18 @@ href="https://colab.research.google.com/">Colab</a> to finish this
 project! <br>(students get Colab Pro for free)!</b>
 </h4>
 
-# Overview
+<br>
+
+<span style="color: darkgreen;">**Starter code can be found [here](/hw5_part_a_startercode/).**</span>
+
+<p style="font-size: 0.85em; margin: 0.5em 1em;">
+  <a href="javascript:void(0)" id="toggle-all" onclick="(function(){var d=document.querySelectorAll('details.section'),open=d[0]&&!d[0].open;d.forEach(function(el){el.open=open});document.getElementById('toggle-all').textContent=open?'Collapse all':'Expand all'})()">Collapse all</a>
+</p>
+
+<details open class="section" markdown="1">
+
+<summary>Overview</summary>
+
 <p>In part A you will play around with diffusion models, implement diffusion
 sampling loops, and use them for other tasks such as inpainting and
 creating optical illusions.
@@ -641,9 +688,13 @@ notebook</a>.</p>
 models, all deliverables should be completed in the notebook. You will
 still submit a webpage with your results.</p>
 
-<p style="color: red; display: inline;"><b>START EARLY!</b></p><span style="margin-left: 5px;"> This assignment, in many ways, will be the most difficult project this semester.</span>
+**Note**: Implementations are provided for parts 1.1, 1.2, 1.3, and 1.4. You can find versions of the starter code with and without these parts implemented at the link above. **You are still expected to submit images for those sections** but are just not required to implement them yourselves.
 
-#  Part 0: Setup
+</details>
+
+<details open class="section" markdown="1">
+<summary>Part 0: Setup</summary>
+
 ## Gaining Access to DeepFloyd
 <p class="text">
 We are going to use the <a
@@ -701,7 +752,11 @@ same seed all subsequent parts.</li>
 
 * Since we ask you to generate [visual anagrams](https://dangeng.github.io/visual_anagrams/) and [hybrid images](https://dangeng.github.io/factorized_diffusion/), you may want to include several text pairs that you plan to use for those tasks later.
 
-# Part 1: Sampling Loops
+</details>
+
+<details open class="section" markdown="1">
+<summary>Part 1: Sampling Loops</summary>
+
 In this part of the problem set, you will write your own "sampling loops"
 that use the pretrained DeepFloyd denoisers. These should produce high
 quality images such as the ones generated above.
@@ -745,7 +800,8 @@ The exact amount of noise added at each step is dictated by noise
 coefficients, $\bar\alpha_t$, which were chosen by the people who
 trained DeepFloyd.
 
-## 1.1 Implementing the Forward Process
+<details class="subsection" markdown="1">
+<summary>1.1 Implementing the Forward Process (Implementation Provided)</summary>
 
 <p class="text">
 A key part of diffusion is the forward process, which takes a clean
@@ -819,7 +875,10 @@ corresponding to $\bar\alpha_t$.</li>
 </div>
 </div>
 
-## 1.2 Classical Denoising
+</details>
+
+<details class="subsection" markdown="1">
+<summary>1.2 Classical Denoising (Implementation Provided)</summary>
 <p class="text">
 Let's try to denoise these images using classical methods.
 Again, take noisy images for timesteps [250, 500, 750], but use
@@ -873,7 +932,10 @@ alt="Gaussian Blur Denoising at t=750">
 </div>
 </div>
 
-## 1.3 One-Step Denoising
+</details>
+
+<details class="subsection" markdown="1">
+<summary>1.3 One-Step Denoising (Implementation Provided)</summary>
 
 <p class="text">
 Now, we'll use a pretrained diffusion model to denoise. The actual
@@ -977,7 +1039,10 @@ alt="Denoised Campanile at t=750">
 </div>
 </div>
 
-## 1.4 Iterative Denoising
+</details>
+
+<details class="subsection" markdown="1">
+<summary>1.4 Iterative Denoising (Implementation Provided)</summary>
 <p class="text">
 In part 1.3, you should see that the denoising UNet does a much better
 job of projecting the image onto the natural image manifold, but it
@@ -1174,6 +1239,8 @@ alt="Gaussian Blurred Campanile">
 <p>Gaussian Blurred Campanile</p>
 </div>
 </div>
+
+</details>
 
 ## 1.5 Diffusion Model Sampling
 <p class="text">
@@ -1742,7 +1809,11 @@ alt="Hybrid image of a skull and a waterfall">
 </div>
 </div>
 
-#  Bells & Whistles (Optional)
+</details>
+
+<details open class="section" markdown="1">
+<summary>Bells &amp; Whistles (Optional)</summary>
+
 <ul>
 <li><b>More visual anagrams!</b> Visual anagrams in part 1.8 are created by flipping images
 upside down. However, there are much more transformations that also create visual
@@ -1753,13 +1824,21 @@ logo or your drawing may be a good idea.</li>
 <li><b>Your own ideas</b>: Be creative!</li>
 </ul>
 
-# <span style="color: red;">Deliverable Checklist</span>
+</details>
+
+<details open class="section" markdown="1">
+<summary><span style="color: red;">Deliverable Checklist</span></summary>
+
 <ul>
 <li>Make sure that your website and submission include <b>all the deliverables</b> in each section above.</li>
 <li>Submit your <b>PDF</b> and <b>code</b> to corresponding assignments on Gradescope.</li>
 </ul>
 
-# Acknowledgements
+</details>
+
+<details open class="section" markdown="1">
+<summary>Acknowledgements</summary>
+
 
 <p>
 This project was a joint effort by
@@ -1810,3 +1889,5 @@ onmouseout="handleMouseOut(this)">
 </video>
 </div>
  -->
+
+</details>

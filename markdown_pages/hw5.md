@@ -3,8 +3,10 @@ title: Homework 5
 layout: default
 permalink: /hw5/
 has_children: true
+has_toc: false
+nav_exclude: true
 nav_order: 6
-published: false
+published: true
 ---
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -641,6 +643,13 @@ style="display: block; margin-left: auto; margin-right: auto;">
 <br />
 
 # Homework 5: Diffusion Models and Flow Matching
+
+<h2 style="text-align: center">
+<b style="color: red;">Due: Thursday, April 16 11:59pm PT</b>
+</h2>
+
+<p style="color: red; display: inline;"><b>START EARLY!</b></p><span style="margin-left: 5px;"> This assignment, in many ways, will be the most difficult project this semester.</span>
+
 
 This assignment is split into two parts:
 

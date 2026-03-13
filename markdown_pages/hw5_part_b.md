@@ -4,7 +4,7 @@ layout: default
 permalink: /hw5/part-b/
 parent: Homework 5
 nav_order: 2
-published: false
+published: true
 ---
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -544,7 +544,24 @@ padding-right: 1em;
 }
 
 
-    
+/* Collapsible section styles */
+details.section {
+  margin: 0.5em 0;
+}
+
+details.section > summary {
+  font-size: x-large;
+  text-align: left;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.25em 0;
+  list-style: revert;
+}
+
+details.section > summary::-webkit-details-marker {
+  display: initial;
+}
+
 </style>
 
 <div>
@@ -562,7 +579,7 @@ style="display: block; margin-left: auto; margin-right: auto;">
 [Part A](/hw5/part-a/)
 
 <h2 style="text-align: center">
-<b style="color: red;">Due: TBD</b>
+<b style="color: red;">Due: Thursday, April 16 11:59pm PT</b>
 </h2>
 <h4 style="text-align: center">
 <b>We recommend using GPUs from <a
@@ -570,7 +587,16 @@ href="https://colab.research.google.com/">Colab</a> to finish this
 project! <br>(students get Colab Pro for free)!</b>
 </h4>
 
-# Overview
+<br>
+
+<span style="color: darkgreen;">**Starter code can be found [here](/hw5_part_b_startercode/).**</span>
+
+<p style="font-size: 0.85em; margin: 0.5em 1em;">
+  <a href="javascript:void(0)" id="toggle-all" onclick="(function(){var d=document.querySelectorAll('details.section'),open=d[0]&&!d[0].open;d.forEach(function(el){el.open=open});document.getElementById('toggle-all').textContent=open?'Collapse all':'Expand all'})()">Collapse all</a>
+</p>
+
+<details open class="section" markdown="1">
+<summary>Overview</summary>
 You will train your own <a href="https://arxiv.org/abs/2210.02747">flow matching</a> model on MNIST. Starter code can
 be found in the <a
 href="https://colab.research.google.com/drive/1GqpAzvLuPwYiwJaY0xLEqdx5IkBNqk1B?usp=drive_link">provided
@@ -616,7 +642,10 @@ The structure of your training code will be very similar to this one.
 
 <!-- <p>Note: this is an updated version of <a href="https://cal-cs180.github.io/fa24/hw/proj5/">CS180's Project 5</a> part B with flow matching instead of DDPM diffusion. For the DDPM version, please see <a href="https://cal-cs180.github.io/fa24/hw/proj5/partb.html">here</a>.</p> -->
 
-# Part 1: Training a Single-Step Denoising UNet
+</details>
+
+<details open class="section" markdown="1">
+<summary>Part 1: Training a Single-Step Denoising UNet</summary>
 <p class="text">
 Let's warmup by building a simple one-step denoiser. Given a noisy image
 $z$, we
@@ -861,7 +890,10 @@ This consists of: <ul>
 </li>
 </ul>
 
-# Part 2: Training a Flow Matching Model
+</details>
+
+<details open class="section" markdown="1">
+<summary>Part 2: Training a Flow Matching Model</summary>
 We just saw that one-step denoising does not work well for generative tasks. Instead, we need to iteratively denoise the image, and we will do so with <a href="https://arxiv.org/abs/2210.02747">flow matching</a>. 
 Here, we will iteratively denoise an image by training a UNet model to predict the `flow' from our noisy data to clean data.
 
@@ -1183,7 +1215,11 @@ style="display: block; margin-left: 0;">
 learning rate scheduler. Show your visualization after training without the scheduler and provide a description of what you did to compensate for the loss of the scheduler.</li>
 </ul>
 
-#  Part 3: Bells & Whistles (Optional)
+</details>
+
+<details open class="section" markdown="1">
+<summary>Bells &amp; Whistles (Optional)</summary>
+
 <!-- <b>Required for CS280A students only:</b> -->
 <ul>
 <li><b>A better time-conditioned only UNet: </b> Our time-conditioning only UNet in part 2.3 is actually far from perfect. Its result is way worse than the UNet conditioned by both time and class.
@@ -1193,17 +1229,24 @@ We can definitively make it better! Show a better visualization image for the ti
 <li><b>Your own ideas</b>: Be creative! This UNet can generate images more than digits! You can try it on <a href="http://ufldl.stanford.edu/housenumbers/">SVHN</a> (still digits, but more fancy!), <a href="https://github.com/zalandoresearch/fashion-mnist">Fashion-MNIST</a> (not digits, but still grayscale!), or <a href="https://www.cs.toronto.edu/~kriz/cifar.html">CIFAR10</a>!</li>
 </ul>
 
-# <span style="color: red;">Deliverable Checklist</span>
+</details>
+
+<details open class="section" markdown="1">
+<summary><span style="color: red;">Deliverable Checklist</span></summary>
+
 <ul>
 <li>Make sure that your website and submission include <b>all the deliverables</b> in each section above.</li>
 <li>Submit your <b>PDF</b> and <b>code</b> to corresponding assignments on Gradescope.</li>
 <!-- <li>
-<b>The Google Form is required for Part B.</b> Once you have finished both parts A and B, submit the link to your webpage (containing both parts) using this 
+<b>The Google Form is required for Part B.</b> Once you have finished both parts A and B, submit the link to your webpage (containing both parts) using this
 <a href="https://forms.gle/gLQhNCyBUaCACt7W6">Google Form</a>. -->
 </li>
 </ul>
 
-# Acknowledgements
+</details>
+
+<details open class="section" markdown="1">
+<summary>Acknowledgements</summary>
 <p>This project was a joint effort by <a
 href="https://ryantabrizi.com/">Ryan Tabrizi</a>, <a
 href="https://dangeng.github.io/">Daniel Geng</a>, <a
@@ -1215,4 +1258,6 @@ href="https://andrewowens.com/">Andrew Owens</a>,
 and <a
 href="https://people.eecs.berkeley.edu/~efros/">Alexei
 Efros</a>. We also thank <a href="https://mcallisterdavid.com/">David McAllister</a> and <a href="https://songweige.github.io/">Songwei Ge</a> for their helpful feedback and suggestions.</p>
+
+</details>
     
