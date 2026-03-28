@@ -4,7 +4,7 @@ layout: default
 permalink: /hw5/
 has_children: true
 has_toc: false
-nav_exclude: true
+nav_exclude: false
 nav_order: 6
 published: true
 ---
