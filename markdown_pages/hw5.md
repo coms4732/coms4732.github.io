@@ -645,7 +645,7 @@ style="display: block; margin-left: auto; margin-right: auto;">
 # Homework 5: Diffusion Models and Flow Matching
 
 <h2 style="text-align: center">
-<b style="color: red;">Due: Thursday, April 16 11:59pm PT</b>
+<b style="color: red;">Due: Friday, April 17 11:59pm PT</b>
 </h2>
 
 <p style="color: red; display: inline;"><b>START EARLY!</b></p><span style="margin-left: 5px;"> This assignment, in many ways, will be the most difficult project this semester.</span>

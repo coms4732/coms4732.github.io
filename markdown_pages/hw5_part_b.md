@@ -579,7 +579,7 @@ style="display: block; margin-left: auto; margin-right: auto;">
 [Part A](/hw5/part-a/)
 
 <h2 style="text-align: center">
-<b style="color: red;">Due: Thursday, April 16 11:59pm PT</b>
+<b style="color: red;">Due: Friday, April 17 11:59pm PT</b>
 </h2>
 <h4 style="text-align: center">
 <b>We recommend using GPUs from <a
@@ -657,7 +657,7 @@ $$L = \mathbb{E}_{z,x} \|D_{\theta}(z) - x\|^2 \tag{B.1}$$
 ##  1.1 Implementing the UNet
 In this project, we implement the denoiser as a <a
 href="https://arxiv.org/abs/1505.04597"> UNet</a>. It consists of a
-few downsampling and upsampling blocks with skip connections.
+few downsampling and upsampling blocks with skip connections. **Note: you should implement the exact UNet below. As bells & whistles you can modify it.**
 <br>
 <br>
 <div style="text-align: center;">
@@ -740,7 +740,7 @@ $$
 
 To train our denoiser, we need to generate training data pairs of ($z$,
 $x$), where each $x$ is a clean MNIST digit. For each training batch, we
-can generate $z$ from $x$ using the the following noising process:
+can generate noisy $z$ from clean $x$. One such way is the following noising process:
 $$
 z = x + \sigma \epsilon,\quad \text{where }\epsilon \sim N(0, I). \tag{B.2}
 $$
@@ -826,8 +826,7 @@ epochs of training</p>
 <ul>
 <li>A training loss curve plot every few iterations during the whole
 training process of $\sigma = 0.5$.</li>
-<li>Sample results on the test set with noise level 0.5 after the first and the 5-th epoch
-(staff solution takes ~3 minutes for 5 epochs on a Colab T4 GPU).</li>
+<li>Sample results on the test set with noise level 0.5 after the first and the 5-th epoch</li>
 </ul>
 
 ### 1.2.2 Out-of-Distribution Testing
@@ -1236,11 +1235,11 @@ We can definitively make it better! Show a better visualization image for the ti
 
 <ul>
 <li>Make sure that your website and submission include <b>all the deliverables</b> in each section above.</li>
-<li>Submit your <b>PDF</b> and <b>code</b> to corresponding assignments on Gradescope.</li>
+<li>As with all past assignments, submit your <b>PDF</b>, <b>webpage</b>, and <b>code</b> to corresponding assignments on Gradescope.</li>
 <!-- <li>
 <b>The Google Form is required for Part B.</b> Once you have finished both parts A and B, submit the link to your webpage (containing both parts) using this
-<a href="https://forms.gle/gLQhNCyBUaCACt7W6">Google Form</a>. -->
-</li>
+<a href="https://forms.gle/gLQhNCyBUaCACt7W6">Google Form</a>.
+</li> -->
 </ul>
 
 </details>

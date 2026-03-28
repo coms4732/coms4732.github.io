@@ -657,7 +657,7 @@ Fire</b></p>
 [Part B](/hw5/part-b/)
 
 <h2 style="text-align: center">
-<b style="color: red;">Due: Thursday, April 16 11:59pm PT</b>
+<b style="color: red;">Due: Friday, April 17 11:59pm PT</b>
 </h2>
 <h4 style="text-align: center">
 <b>We recommend using GPUs from <a
@@ -680,9 +680,7 @@ project! <br>(students get Colab Pro for free)!</b>
 <p>In part A you will play around with diffusion models, implement diffusion
 sampling loops, and use them for other tasks such as inpainting and
 creating optical illusions.
-Instructions can be found below and in the <a
-href="https://colab.research.google.com/drive/19mp-ssAv3CQuVvFsUu2VvWEwnqLds9gx?usp=sharing">provided
-notebook</a>.</p>
+Instructions can be found below and in the starter code above. </p>
 
 <p>Because part A is simply to get your feet wet with pre-trained diffusion
 models, all deliverables should be completed in the notebook. You will
