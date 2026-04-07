@@ -710,7 +710,7 @@ Before using DeepFloyd, you must accept its usage conditions. To do so:
 and log in.</li>
 <li>Accept the license on the model card of <a
 href="https://huggingface.co/DeepFloyd/IF-I-XL-v1.0">DeepFloyd/IF-I-XL-v1.0</a>.
-For affiliation, you can fill in "The University of California, Berkeley."
+For affiliation, you can fill in "Columbia University"
 Accepting the license on the stage I model card will auto accept for the
 other IF models.</li>
 <li>Log in locally by entering your <a
